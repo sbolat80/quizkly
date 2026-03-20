@@ -22,7 +22,7 @@ const HomeScreen = () => {
     >
       {/* Top-right controls */}
       <div className="absolute top-4 right-4">
-        <div className="flex items-center rounded-full px-3 py-1.5 backdrop-blur-sm border transition-all duration-200 hover:brightness-125 bg-white/10 border-white/20 dark:bg-white/10 dark:border-white/20 bg-black/[0.06] border-black/[0.12] dark:bg-white/10 dark:border-white/20">
+        <div className="flex items-center rounded-full px-3 py-1.5 backdrop-blur-sm border transition-all duration-200 hover:brightness-110 bg-black/[0.06] border-black/[0.12] dark:bg-white/10 dark:border-white/20">
           <button
             onClick={toggleTheme}
             className="flex items-center justify-center w-7 h-7 rounded-full transition-colors"
