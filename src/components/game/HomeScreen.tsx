@@ -34,11 +34,11 @@ const HomeScreen = () => {
         transition={{ type: 'spring', stiffness: 180, damping: 14 }}
         className="flex flex-col items-center"
       >
-        <h1 className="text-7xl md:text-9xl font-black tracking-tight leading-none">
+        <h1 className="text-5xl md:text-6xl font-black tracking-tight leading-none">
           <span className="text-primary text-glow-primary">Ink</span>
           <span style={{ color: '#EC4899' }}>zy</span>
         </h1>
-        <span className="text-4xl mt-1">🦑</span>
+        <span className="text-5xl mt-2">🦑</span>
       </motion.div>
 
       {/* Tagline */}
