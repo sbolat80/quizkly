@@ -5,7 +5,7 @@ import CreateScreen from './CreateScreen';
 import JoinScreen from './JoinScreen';
 
 const PlaceholderScreen = ({ name }: { name: string }) => (
-  <div className="min-h-screen flex items-center justify-center bg-ocean-dark text-foreground font-bold">
+  <div className="min-h-screen flex items-center justify-center bg-background text-foreground font-bold">
     {name}
   </div>
 );

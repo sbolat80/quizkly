@@ -31,7 +31,7 @@ const CreateScreen = () => {
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: -100, opacity: 0 }}
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      className="min-h-screen flex flex-col bg-ocean-dark"
+      className="min-h-screen flex flex-col bg-background"
     >
       <div className="w-full max-w-[428px] mx-auto flex flex-col flex-1 p-4 gap-5">
         {/* Header */}
