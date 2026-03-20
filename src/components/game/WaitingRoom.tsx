@@ -58,6 +58,8 @@ const WaitingRoom = () => {
     return avatars.find((a) => a.id === avatarId)?.image ?? avatars[0].image;
   };
 
+  const otherPlayers = players.filter((p) => p.session_id !== sessionId);
+
   return (
     <motion.div
       initial={{ x: 60, opacity: 0 }}
@@ -82,11 +84,14 @@ const WaitingRoom = () => {
 
         {/* Scrollable content */}
         <div className="flex-1 overflow-y-auto flex flex-col items-center gap-5 pt-2 pb-4">
-          {/* Game Code Section */}
-          <div className="flex flex-col items-center gap-1.5">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              {t('gameCode')}
-            </span>
+          {/* Game Code label */}
+          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+            {t('gameCode')}
+          </span>
+
+          {/* Game Code + QR side by side */}
+          <div className="flex items-center gap-4 w-full justify-center">
+            {/* Code box */}
             <button
               onClick={copyCode}
               className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-primary text-primary-foreground transition-transform active:scale-95"
@@ -94,16 +99,14 @@ const WaitingRoom = () => {
               <span className="text-3xl font-black tracking-[0.25em]">{gameCode}</span>
               <Copy className="w-5 h-5 opacity-70" />
             </button>
-            <span className="text-xs text-muted-foreground">{t('tapToCopy')}</span>
+
+            {/* QR Code */}
+            <div className="bg-white p-2 rounded-xl shadow-sm shrink-0">
+              <QRCodeSVG value={joinUrl} size={72} />
+            </div>
           </div>
 
-          {/* QR Code */}
-          <div className="flex flex-col items-center gap-1.5">
-            <div className="bg-white p-3 rounded-xl shadow-sm">
-              <QRCodeSVG value={joinUrl} size={100} />
-            </div>
-            <span className="text-xs text-muted-foreground">{t('scanToJoin')}</span>
-          </div>
+          <span className="text-xs text-muted-foreground">{t('tapToCopy')}</span>
 
           {/* Share Link Button */}
           <Button
@@ -170,6 +173,17 @@ const WaitingRoom = () => {
                   );
                 })}
               </AnimatePresence>
+
+              {/* Empty state when only host is present */}
+              {otherPlayers.length === 0 && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center text-sm text-muted-foreground py-6"
+                >
+                  {t('noPlayersYet')}
+                </motion.p>
+              )}
             </div>
           </div>
         </div>
@@ -177,15 +191,22 @@ const WaitingRoom = () => {
         {/* Bottom action */}
         <div className="sticky bottom-0 bg-background pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
           {isHost ? (
-            <Button
-              size="lg"
-              className="w-full h-14 text-lg font-extrabold rounded-2xl gap-2 animate-pulse"
-              disabled={players.length < 2 || loading}
-              onClick={startGame}
-            >
-              <Play className="w-5 h-5" />
-              {loading ? t('starting') : t('startGame')}
-            </Button>
+            <div className="flex flex-col items-center gap-1.5">
+              <Button
+                size="lg"
+                className="w-full h-14 text-lg font-extrabold rounded-2xl gap-2 animate-pulse"
+                disabled={players.length < 2 || loading}
+                onClick={startGame}
+              >
+                <Play className="w-5 h-5" />
+                {loading ? t('starting') : t('startGame')}
+              </Button>
+              {players.length < 2 && (
+                <span className="text-xs text-muted-foreground">
+                  {t('minPlayersHint')}
+                </span>
+              )}
+            </div>
           ) : (
             <motion.p
               initial={{ opacity: 0 }}

@@ -26,6 +26,8 @@ const en = {
   host: "Host",
   startGame: "Start Game",
   starting: "Starting...",
+  noPlayersYet: "No one has joined yet... 👀",
+  minPlayersHint: "At least 2 players needed",
   waitingForHost: "Waiting for host to start...",
   getReady: "Get ready!",
   question: "Question",
