@@ -102,7 +102,7 @@ const HomeScreen = () => {
         transition={{ delay: 0.7, duration: 0.6 }}
         className="absolute bottom-6 text-xs font-bold text-[#6D28D9] dark:text-white/40"
       >
-        🦑 inkzy.gg
+        🎮 quizkly.gg
       </motion.p>
     </motion.div>
   );

@@ -1,4 +1,4 @@
-const SESSION_KEY = "inkzy_session_id";
+const SESSION_KEY = "quizkly_session_id";
 
 export const getSessionId = (): string => {
   let id = localStorage.getItem(SESSION_KEY);
