@@ -53,10 +53,10 @@ const HomeScreen = () => {
         className="flex flex-col items-center"
       >
         <h1 className="text-5xl md:text-6xl font-black tracking-tight leading-none">
-          <span className="text-primary text-glow-primary">Ink</span>
-          <span style={{ color: '#EC4899' }}>zy</span>
+          <span className="text-primary text-glow-primary">Quiz</span>
+          <span style={{ color: '#EC4899' }}>kly</span>
         </h1>
-        <span className="text-5xl mt-3">🦑</span>
+        <span className="text-5xl mt-3">🎮</span>
       </motion.div>
 
       {/* Tagline */}
