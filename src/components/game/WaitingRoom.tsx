@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Copy, Share2, Play, Crown } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
