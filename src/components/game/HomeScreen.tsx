@@ -56,7 +56,7 @@ const HomeScreen = () => {
         initial={{ y: 24, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.45, duration: 0.5 }}
-        className="mt-10 flex flex-col gap-3 w-full max-w-[280px]"
+        className="mt-8 flex flex-col gap-3 w-full max-w-[280px]"
       >
         <Button
           size="lg"
