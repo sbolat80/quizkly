@@ -75,6 +75,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const { game, player } = await gameService.createGame(nickname, avatarId, language);
       store.setGame(game);
       store.setCurrentPlayer(player);
+      const players = await gameService.getGamePlayers(game.id);
+      store.setPlayers(players);
       setupSubscriptions(game.id);
       store.setScreen('waiting');
     } finally {
