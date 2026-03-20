@@ -34,11 +34,11 @@ const HomeScreen = () => {
         transition={{ type: 'spring', stiffness: 180, damping: 14 }}
         className="flex flex-col items-center"
       >
-        <h1 className="text-7xl md:text-9xl font-black tracking-tight leading-none">
+        <h1 className="text-5xl md:text-6xl font-black tracking-tight leading-none">
           <span className="text-primary text-glow-primary">Ink</span>
           <span style={{ color: '#EC4899' }}>zy</span>
         </h1>
-        <span className="text-4xl mt-1">🦑</span>
+        <span className="text-5xl mt-2">🦑</span>
       </motion.div>
 
       {/* Tagline */}
@@ -46,7 +46,7 @@ const HomeScreen = () => {
         initial={{ y: 16, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.25, duration: 0.5 }}
-        className="mt-3 text-base text-muted-foreground font-bold"
+        className="mt-4 text-base text-muted-foreground font-bold"
       >
         {t('tagline')}
       </motion.p>
@@ -56,7 +56,7 @@ const HomeScreen = () => {
         initial={{ y: 24, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.45, duration: 0.5 }}
-        className="mt-10 flex flex-col gap-3 w-full max-w-[280px]"
+        className="mt-8 flex flex-col gap-3 w-full max-w-[280px]"
       >
         <Button
           size="lg"
