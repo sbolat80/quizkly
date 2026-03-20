@@ -26,6 +26,8 @@ const tr = {
   host: "Ev Sahibi",
   startGame: "Oyunu Başlat",
   starting: "Başlıyor...",
+  noPlayersYet: "Henüz kimse katılmadı... 👀",
+  minPlayersHint: "En az 2 oyuncu gerekli",
   waitingForHost: "Ev sahibinin başlatması bekleniyor...",
   getReady: "Hazır ol!",
   question: "Soru",
