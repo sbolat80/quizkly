@@ -27,6 +27,15 @@ const WaitingRoom = () => {
   const gameCode = game?.game_code ?? '';
   const joinUrl = `${window.location.origin}/join/${gameCode}`;
 
+  // Fallback: fetch players if store is empty
+  useEffect(() => {
+    if (game?.id && players.length === 0) {
+      gameService.getGamePlayers(game.id).then((p) => {
+        useGameStore.getState().setPlayers(p);
+      });
+    }
+  }, [game?.id, players.length]);
+
   // Play sound when a new player joins
   useEffect(() => {
     if (players.length > prevCountRef.current) {
