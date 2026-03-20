@@ -1,5 +1,5 @@
 const en = {
-  tagline: "The ultimate ocean quiz battle!",
+  tagline: "Think fast. Ink faster.",
   createGame: "Create Game",
   joinGame: "Join Game",
   back: "Back",
