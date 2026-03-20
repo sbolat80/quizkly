@@ -33,7 +33,7 @@ const CreateScreen = () => {
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       className="min-h-screen flex flex-col bg-background"
     >
-      <div className="w-full max-w-[428px] mx-auto flex flex-col flex-1 p-4 gap-5">
+      <div className="w-full max-w-[428px] mx-auto flex flex-col flex-1 p-4">
         {/* Back button */}
         <div className="flex items-center">
           <Button
@@ -47,64 +47,66 @@ const CreateScreen = () => {
           </Button>
         </div>
 
-        {/* Title */}
-        <div className="flex flex-col items-center gap-1 pt-2">
-          <span className="text-5xl leading-none">🎮</span>
-          <h2 className="text-3xl font-black text-foreground">
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-y-auto flex flex-col gap-5 pt-2">
+          {/* Title */}
+          <h2 className="text-3xl font-black text-foreground text-center">
             {t('createGame')}
           </h2>
-        </div>
 
-        {/* Question Language */}
-        <div className="space-y-2">
-          <label className="text-sm font-bold text-muted-foreground">
-            {t('questionLanguage')}
-          </label>
-          <div className="flex gap-2 justify-center">
-            {(['en', 'tr'] as const).map((l) => (
-              <Button
-                key={l}
-                variant={questionLang === l ? 'default' : 'outline'}
-                size="sm"
-                className={`font-bold gap-1.5 rounded-full px-5 ${
-                  questionLang !== l ? 'border-primary/30 text-muted-foreground' : ''
-                }`}
-                onClick={() => setQuestionLang(l)}
-              >
-                {l === 'en' ? '🇬🇧 EN' : '🇹🇷 TR'}
-              </Button>
-            ))}
+          {/* Question Language */}
+          <div className="space-y-2 text-center">
+            <label className="text-sm font-bold text-muted-foreground">
+              {t('questionLanguage')}
+            </label>
+            <div className="flex gap-2 justify-center">
+              {(['en', 'tr'] as const).map((l) => (
+                <Button
+                  key={l}
+                  variant={questionLang === l ? 'default' : 'outline'}
+                  size="sm"
+                  className={`font-bold gap-1.5 rounded-full px-5 ${
+                    questionLang !== l ? 'border-primary/30 text-muted-foreground' : ''
+                  }`}
+                  onClick={() => setQuestionLang(l)}
+                >
+                  {l === 'en' ? '🇬🇧 EN' : '🇹🇷 TR'}
+                </Button>
+              ))}
+            </div>
           </div>
+
+          {/* Avatar */}
+          <div className="space-y-2 text-center">
+            <label className="text-sm font-bold text-muted-foreground">
+              {t('chooseAvatar')}
+            </label>
+            <AvatarPicker selected={avatarId} onSelect={setAvatarId} />
+          </div>
+
+          {/* Nickname */}
+          <TypewriterInput
+            placeholderText={t('enterNickname')}
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value.slice(0, 16))}
+            maxLength={16}
+            className="h-12 text-center text-lg font-bold rounded-xl bg-card/60 border-border"
+            onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
+          />
         </div>
 
-        {/* Avatar */}
-        <div className="space-y-2">
-          <label className="text-sm font-bold text-muted-foreground">
-            {t('chooseAvatar')}
-          </label>
-          <AvatarPicker selected={avatarId} onSelect={setAvatarId} />
+        {/* Create button - sticky bottom */}
+        <div className="sticky bottom-0 bg-background pt-3 pb-4">
+          <Button
+            size="lg"
+            className="w-full h-14 text-lg font-extrabold rounded-2xl gap-2"
+            disabled={!nickname.trim() || loading}
+            onClick={handleCreate}
+          >
+            <Sparkles className="w-5 h-5" />
+            {loading ? t('starting') : t('createRoom')}
+          </Button>
         </div>
-
-        {/* Nickname */}
-        <TypewriterInput
-          placeholderText={t('enterNickname')}
-          value={nickname}
-          onChange={(e) => setNickname(e.target.value.slice(0, 16))}
-          maxLength={16}
-          className="h-12 text-center text-lg font-bold rounded-xl bg-card/60 border-border"
-          onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
-        />
-
-        {/* Create button */}
-        <Button
-          size="lg"
-          className="h-14 text-lg font-extrabold rounded-2xl gap-2 mt-auto mb-6"
-          disabled={!nickname.trim() || loading}
-          onClick={handleCreate}
-        >
-          <Sparkles className="w-5 h-5" />
-          {loading ? t('starting') : t('createRoom')}
-        </Button>
       </div>
     </motion.div>
   );

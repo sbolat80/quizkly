@@ -43,8 +43,8 @@ export function AvatarPicker({ selected, onSelect }: AvatarPickerProps) {
             }}
             className={`flex flex-col items-center gap-1 rounded-2xl p-2 transition-colors ${
               isSelected
-                ? 'ring-2 ring-primary bg-primary/10'
-                : 'bg-card/60 hover:bg-card/80'
+                ? 'border-2 border-primary bg-primary/10'
+                : 'border border-muted-foreground/20 bg-card/60 hover:bg-card/80'
             }`}
           >
             <motion.img
