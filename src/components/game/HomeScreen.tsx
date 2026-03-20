@@ -19,7 +19,7 @@ const HomeScreen = () => {
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: -100, opacity: 0 }}
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      className="min-h-screen flex flex-col items-center justify-center bg-background relative overflow-hidden px-6"
+      className="min-h-screen flex flex-col items-center justify-center bg-background relative overflow-hidden px-6 pl-[max(1.5rem,env(safe-area-inset-left))] pr-[max(1.5rem,env(safe-area-inset-right))]"
     >
       {/* Top-right controls */}
       <div className="absolute top-4 right-4">

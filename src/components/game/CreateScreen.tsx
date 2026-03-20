@@ -31,9 +31,9 @@ const CreateScreen = () => {
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: -60, opacity: 0 }}
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      className="min-h-screen flex flex-col bg-background"
+      className="min-h-screen flex flex-col bg-background pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]"
     >
-      <div className="w-full max-w-[428px] mx-auto flex flex-col flex-1 p-4">
+      <div className="w-full max-w-[428px] mx-auto flex flex-col flex-1 px-4 pt-4">
         {/* Back button */}
         <div className="flex items-center">
           <Button
@@ -96,7 +96,7 @@ const CreateScreen = () => {
         </div>
 
         {/* Create button - sticky bottom */}
-        <div className="sticky bottom-0 bg-background pt-3 pb-4">
+        <div className="sticky bottom-0 bg-background pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
           <Button
             size="lg"
             className="w-full h-14 text-lg font-extrabold rounded-2xl gap-2"
