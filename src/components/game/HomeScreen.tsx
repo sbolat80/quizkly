@@ -34,7 +34,7 @@ const HomeScreen = () => {
               <Moon className="w-4 h-4" style={{ color: '#4C1D95' }} />
             )}
           </button>
-          <div className="w-px h-4 mx-2 bg-white/20 dark:bg-white/20 bg-black/[0.12]" />
+          <div className="w-px h-4 mx-2 bg-black/[0.12] dark:bg-white/20" />
           <button
             onClick={toggleLang}
             className="flex items-center gap-1.5 text-sm font-bold transition-colors text-foreground/70 hover:text-foreground"
