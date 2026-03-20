@@ -64,7 +64,7 @@ const HomeScreen = () => {
         initial={{ y: 16, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.25, duration: 0.5 }}
-        className="mt-6 text-base text-muted-foreground font-bold text-center whitespace-pre-line leading-relaxed"
+        className="mt-6 text-base font-bold text-center whitespace-pre-line leading-relaxed text-foreground/60"
       >
         {t('tagline')}
       </motion.p>
@@ -100,7 +100,7 @@ const HomeScreen = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.7, duration: 0.6 }}
-        className="absolute bottom-6 text-xs text-muted-foreground/50 font-bold"
+        className="absolute bottom-6 text-xs font-bold text-foreground/40"
       >
         🦑 inkzy.gg
       </motion.p>
