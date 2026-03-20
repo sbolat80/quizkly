@@ -3,7 +3,7 @@ const tr = {
   createGame: "Oyun Oluştur",
   joinGame: "Oyuna Katıl",
   back: "Geri",
-  enterNickname: "Takma adınızı girin",
+  enterNickname: "Takma adını gir",
   createRoom: "Oda Oluştur",
   questionLanguage: "Soru Dili",
   enterGameCode: "Oyun kodunu girin",
