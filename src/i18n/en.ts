@@ -51,12 +51,12 @@ const en = {
   langTurkish: "Turkish",
   avatar1: "Pinky",
   avatar2: "Dotty",
-  avatar3: "Boxy",
-  avatar4: "Sharky",
-  avatar5: "Nemo",
-  avatar6: "Star",
-  avatar7: "Disco",
-  avatar8: "Blob",
+  avatar3: "Sparky",
+  avatar4: "Gloop",
+  avatar5: "Flappy",
+  avatar6: "Fuzzy",
+  avatar7: "Blocko",
+  avatar8: "Chili",
 } as const;
 
 export type TranslationKeys = keyof typeof en;

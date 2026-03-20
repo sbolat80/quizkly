@@ -8,6 +8,21 @@ interface AvatarPickerProps {
   onSelect: (id: number) => void;
 }
 
+const idleAnimation = {
+  y: [0, -4, 0],
+  transition: {
+    duration: 2.4,
+    repeat: Infinity,
+    ease: 'easeInOut',
+  },
+};
+
+const selectedAnimation = {
+  scale: [1, 1.15, 1],
+  rotate: [0, -6, 6, 0],
+  transition: { duration: 0.4, ease: 'easeOut' },
+};
+
 export function AvatarPicker({ selected, onSelect }: AvatarPickerProps) {
   const { t } = useI18n();
 
@@ -26,13 +41,18 @@ export function AvatarPicker({ selected, onSelect }: AvatarPickerProps) {
               onSelect(av.id);
               playAvatarSelect(av.id);
             }}
-            className={`flex flex-col items-center gap-1 rounded-xl p-2 transition-colors ${
+            className={`flex flex-col items-center gap-1 rounded-2xl p-2 transition-colors ${
               isSelected
                 ? 'ring-2 ring-primary bg-primary/10'
                 : 'bg-card/60 hover:bg-card/80'
             }`}
           >
-            <span className="text-4xl leading-none">{av.emoji}</span>
+            <motion.img
+              src={av.image}
+              alt={t(av.nameKey)}
+              className="h-16 w-16 object-contain"
+              animate={isSelected ? selectedAnimation : idleAnimation}
+            />
             <span className={`text-xs font-bold truncate w-full text-center ${
               isSelected ? 'text-primary' : 'text-muted-foreground'
             }`}>
