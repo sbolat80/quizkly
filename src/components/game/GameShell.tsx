@@ -3,6 +3,7 @@ import { useGameStore } from '@/stores/gameStore';
 import HomeScreen from './HomeScreen';
 import CreateScreen from './CreateScreen';
 import JoinScreen from './JoinScreen';
+import WaitingRoom from './WaitingRoom';
 
 const PlaceholderScreen = ({ name }: { name: string }) => (
   <div className="min-h-screen flex items-center justify-center bg-background text-foreground font-bold">
@@ -22,7 +23,7 @@ const GameShell = ({ initialCode }: GameShellProps) => {
       case 'home': return <HomeScreen key="home" />;
       case 'create': return <CreateScreen key="create" />;
       case 'join': return <JoinScreen key="join" initialCode={initialCode} />;
-      case 'waiting': return <PlaceholderScreen key="waiting" name="WaitingRoom" />;
+      case 'waiting': return <WaitingRoom key="waiting" />;
       case 'countdown': return <PlaceholderScreen key="countdown" name="CountdownScreen" />;
       case 'question': return <PlaceholderScreen key="question" name="QuestionScreen" />;
       case 'round_result': return <PlaceholderScreen key="round_result" name="RoundResult" />;
