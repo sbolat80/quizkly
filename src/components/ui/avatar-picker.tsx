@@ -13,14 +13,14 @@ const idleAnimation = {
   transition: {
     duration: 2.4,
     repeat: Infinity,
-    ease: 'easeInOut',
+    ease: 'easeInOut' as const,
   },
 };
 
 const selectedAnimation = {
   scale: [1, 1.15, 1],
   rotate: [0, -6, 6, 0],
-  transition: { duration: 0.4, ease: 'easeOut' },
+  transition: { duration: 0.4, ease: 'easeOut' as const },
 };
 
 export function AvatarPicker({ selected, onSelect }: AvatarPickerProps) {
