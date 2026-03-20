@@ -55,12 +55,12 @@ const HomeScreen = () => {
           opacity: { type: 'spring', stiffness: 200, damping: 15 },
           y: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
         }}
-        className="flex flex-col items-center"
+        className="flex flex-col items-center pt-8"
       >
         <img
           src={QuizklyLogo}
           alt="Quizkly"
-          className="h-32 w-auto dark:brightness-100 brightness-0"
+          className="h-40 md:h-48 w-auto object-contain dark:brightness-100 brightness-0"
         />
       </motion.div>
 
@@ -69,7 +69,7 @@ const HomeScreen = () => {
         initial={{ y: 16, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.25, duration: 0.5 }}
-        className="mt-6 text-base font-bold text-center whitespace-pre-line leading-relaxed text-[#3B0764] dark:text-white/60"
+        className="mt-8 text-base font-bold text-center whitespace-pre-line leading-relaxed text-[#3B0764] dark:text-white/60"
       >
         {t('tagline')}
       </motion.p>
