@@ -25,7 +25,6 @@ const JoinScreen = ({ initialCode }: { initialCode?: string }) => {
   const [avatarId, setAvatarId] = useState(1);
   const [codeStatus, setCodeStatus] = useState<CodeStatus>(initialCode ? 'checking' : 'idle');
 
-  // Validate code against Supabase
   useEffect(() => {
     if (code.length < 3) {
       setCodeStatus('idle');
@@ -78,25 +77,31 @@ const JoinScreen = ({ initialCode }: { initialCode?: string }) => {
 
   return (
     <motion.div
-      initial={{ x: 100, opacity: 0 }}
+      initial={{ x: 60, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      exit={{ x: -100, opacity: 0 }}
+      exit={{ x: -60, opacity: 0 }}
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       className="min-h-screen flex flex-col bg-background"
     >
       <div className="w-full max-w-[428px] mx-auto flex flex-col flex-1 p-4 gap-5">
-        {/* Header */}
-        <div className="flex items-center gap-3">
+        {/* Back button */}
+        <div className="flex items-center">
           <Button
             variant="ghost"
-            size="icon"
+            size="sm"
             onClick={() => setScreen('home')}
-            className="text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground gap-1.5"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4" />
+            {t('back')}
           </Button>
-          <h2 className="text-xl font-extrabold text-foreground">
-            {t('joinGame')} 🌊
+        </div>
+
+        {/* Title */}
+        <div className="flex flex-col items-center gap-1 pt-2">
+          <span className="text-5xl leading-none">🌊</span>
+          <h2 className="text-3xl font-black text-foreground">
+            {t('joinGame')}
           </h2>
         </div>
 
@@ -118,12 +123,23 @@ const JoinScreen = ({ initialCode }: { initialCode?: string }) => {
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase().slice(0, 6))}
               maxLength={6}
-              className="h-12 text-center text-2xl font-black tracking-[0.3em] uppercase bg-card/60 border-border"
+              className="h-12 text-center text-2xl font-black tracking-[0.3em] uppercase rounded-xl bg-card/60 border-border"
             />
             <div className="absolute right-3 top-1/2 -translate-y-1/2">
               {statusIcon()}
             </div>
           </div>
+          {hasError && (
+            <motion.div
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="rounded-lg bg-destructive/10 border border-destructive/20 px-3 py-2 text-xs text-destructive font-medium"
+            >
+              {codeStatus === 'not_found' && t('invalidLink')}
+              {codeStatus === 'finished' && t('gameEnded')}
+              {codeStatus === 'started' && t('gameStarted')}
+            </motion.div>
+          )}
         </div>
 
         {/* Nickname */}
@@ -132,14 +148,14 @@ const JoinScreen = ({ initialCode }: { initialCode?: string }) => {
           value={nickname}
           onChange={(e) => setNickname(e.target.value.slice(0, 16))}
           maxLength={16}
-          className="h-12 text-center text-lg font-bold bg-card/60 border-border"
+          className="h-12 text-center text-lg font-bold rounded-xl bg-card/60 border-border"
           onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
         />
 
         {/* Join button */}
         <Button
           size="lg"
-          className="h-14 text-lg font-extrabold rounded-full gap-2 mt-auto mb-6"
+          className="h-14 text-lg font-extrabold rounded-2xl gap-2 mt-auto mb-6"
           disabled={!canJoin}
           onClick={handleJoin}
         >

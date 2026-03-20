@@ -51,12 +51,12 @@ const tr = {
   langTurkish: "Türkçe",
   avatar1: "Pembe",
   avatar2: "Benekli",
-  avatar3: "Dikenli",
-  avatar4: "Köpek",
-  avatar5: "Palyaço",
-  avatar6: "Yıldız",
-  avatar7: "Diskus",
-  avatar8: "Somurtkan",
+  avatar3: "Çıtır",
+  avatar4: "Cıvık",
+  avatar5: "Fırdöndü",
+  avatar6: "Tüylü",
+  avatar7: "Küpük",
+  avatar8: "Biberik",
 } as const;
 
 export default tr;
