@@ -1,5 +1,5 @@
 const tr = {
-  tagline: "En eğlenceli okyanus bilgi yarışması!",
+  tagline: "Hızlı düşün. Hızlı mürekkeplen.",
   createGame: "Oyun Oluştur",
   joinGame: "Oyuna Katıl",
   back: "Geri",
