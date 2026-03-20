@@ -83,30 +83,34 @@ const WaitingRoom = () => {
         </div>
 
         {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto flex flex-col items-center gap-5 pt-2 pb-4">
+        <div className="flex-1 overflow-y-auto flex flex-col items-center gap-5 pt-2 pb-4 overflow-x-hidden">
           {/* Game Code label */}
           <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
             {t('gameCode')}
           </span>
 
           {/* Game Code + QR side by side */}
-          <div className="flex items-center gap-4 w-full justify-center">
+          <div className="flex items-center justify-center gap-4 w-full">
             {/* Code box */}
-            <button
-              onClick={copyCode}
-              className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-primary text-primary-foreground transition-transform active:scale-95"
-            >
-              <span className="text-3xl font-black tracking-[0.25em]">{gameCode}</span>
-              <Copy className="w-5 h-5 opacity-70" />
-            </button>
+            <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
+              <button
+                onClick={copyCode}
+                className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-primary text-primary-foreground transition-transform active:scale-95 w-full justify-center"
+              >
+                <span className="text-2xl font-black tracking-[0.2em]">{gameCode}</span>
+                <Copy className="w-5 h-5 opacity-70 shrink-0" />
+              </button>
+              <span className="text-xs text-muted-foreground">{t('tapToCopy')}</span>
+            </div>
 
             {/* QR Code */}
-            <div className="bg-white p-2 rounded-xl shadow-sm shrink-0">
-              <QRCodeSVG value={joinUrl} size={72} />
+            <div className="flex flex-col items-center shrink-0">
+              <div className="bg-white p-2 rounded-xl shadow-sm overflow-hidden">
+                <QRCodeSVG value={joinUrl} size={90} />
+              </div>
+              <span className="text-[10px] text-muted-foreground mt-1">{t('scanToJoin')}</span>
             </div>
           </div>
-
-          <span className="text-xs text-muted-foreground">{t('tapToCopy')}</span>
 
           {/* Share Link Button */}
           <Button
