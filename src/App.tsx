@@ -3,7 +3,8 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { I18nProvider } from "@/i18n";
-import HomeScreen from "./pages/HomeScreen";
+import { GameProvider } from "@/context/GameContext";
+import GameShell from "@/components/game/GameShell";
 import JoinByLink from "./pages/JoinByLink";
 import NotFound from "./pages/NotFound";
 
@@ -16,7 +17,14 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<HomeScreen />} />
+            <Route
+              path="/"
+              element={
+                <GameProvider>
+                  <GameShell />
+                </GameProvider>
+              }
+            />
             <Route path="/join/:code" element={<JoinByLink />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
