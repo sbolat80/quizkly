@@ -46,7 +46,7 @@ const HomeScreen = () => {
         initial={{ y: 16, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.25, duration: 0.5 }}
-        className="mt-3 text-base text-muted-foreground font-bold"
+        className="mt-4 text-base text-muted-foreground font-bold"
       >
         {t('tagline')}
       </motion.p>
