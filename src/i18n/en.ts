@@ -1,5 +1,5 @@
 const en = {
-  tagline: "Think fast. Ink faster.",
+  tagline: "Think fast. Answer correctly.\nBeat your friends.",
   createGame: "Create Game",
   joinGame: "Join Game",
   back: "Back",
