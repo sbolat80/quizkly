@@ -3,10 +3,12 @@ import { Globe, Zap, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useI18n } from '@/i18n';
 import { useGameStore } from '@/stores/gameStore';
+import { useTheme } from '@/hooks/use-theme';
 
 const HomeScreen = () => {
   const { t, lang, setLang } = useI18n();
   const setScreen = useGameStore((s) => s.setScreen);
+  const { theme, toggleTheme } = useTheme();
 
   const toggleLang = () => setLang(lang === 'en' ? 'tr' : 'en');
 
@@ -16,16 +18,25 @@ const HomeScreen = () => {
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: -100, opacity: 0 }}
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      className="min-h-screen flex flex-col items-center justify-center bg-ocean-dark relative overflow-hidden"
+      className="min-h-screen flex flex-col items-center justify-center bg-background relative overflow-hidden px-6"
     >
-      {/* Language toggle */}
-      <button
-        onClick={toggleLang}
-        className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/10 text-muted-foreground hover:text-foreground transition-colors text-sm font-bold"
-      >
-        <Globe className="w-4 h-4" />
-        {lang === 'en' ? '🇬🇧' : '🇹🇷'} {lang.toUpperCase()}
-      </button>
+      {/* Top-right controls */}
+      <div className="absolute top-4 right-4 flex items-center gap-2">
+        <button
+          onClick={toggleTheme}
+          className="flex items-center justify-center w-9 h-9 rounded-lg bg-muted/10 text-muted-foreground hover:text-foreground transition-colors text-lg"
+          aria-label="Toggle theme"
+        >
+          {theme === 'dark' ? '☀️' : '🌙'}
+        </button>
+        <button
+          onClick={toggleLang}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/10 text-muted-foreground hover:text-foreground transition-colors text-sm font-bold"
+        >
+          <Globe className="w-4 h-4" />
+          {lang === 'en' ? '🇬🇧' : '🇹🇷'} {lang.toUpperCase()}
+        </button>
+      </div>
 
       {/* Logo */}
       <motion.div
@@ -38,7 +49,7 @@ const HomeScreen = () => {
           <span className="text-primary text-glow-primary">Ink</span>
           <span style={{ color: '#EC4899' }}>zy</span>
         </h1>
-        <span className="text-5xl mt-2">🦑</span>
+        <span className="text-5xl mt-3">🦑</span>
       </motion.div>
 
       {/* Tagline */}
@@ -46,7 +57,7 @@ const HomeScreen = () => {
         initial={{ y: 16, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.25, duration: 0.5 }}
-        className="mt-4 text-base text-muted-foreground font-bold"
+        className="mt-6 text-base text-muted-foreground font-bold text-center whitespace-pre-line leading-relaxed"
       >
         {t('tagline')}
       </motion.p>
