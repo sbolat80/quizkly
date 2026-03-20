@@ -3,7 +3,7 @@ const tr = {
   createGame: "Oyun Oluştur",
   joinGame: "Oyuna Katıl",
   back: "Geri",
-  enterNickname: "Takma adınızı girin",
+  enterNickname: "Takma adını gir",
   createRoom: "Oda Oluştur",
   questionLanguage: "Soru Dili",
   enterGameCode: "Oyun kodunu girin",
@@ -49,14 +49,14 @@ const tr = {
   newGame: "Yeni Oyun",
   langEnglish: "İngilizce",
   langTurkish: "Türkçe",
-  avatar1: "Pembe",
-  avatar2: "Benekli",
+  avatar1: "Biberik",
+  avatar2: "Küpük",
   avatar3: "Çıtır",
   avatar4: "Cıvık",
   avatar5: "Fırdöndü",
   avatar6: "Tüylü",
-  avatar7: "Küpük",
-  avatar8: "Biberik",
+  avatar7: "Benekli",
+  avatar8: "Pembe",
 } as const;
 
 export default tr;

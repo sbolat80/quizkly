@@ -83,7 +83,7 @@ const JoinScreen = ({ initialCode }: { initialCode?: string }) => {
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       className="min-h-screen flex flex-col bg-background"
     >
-      <div className="w-full max-w-[428px] mx-auto flex flex-col flex-1 p-4 gap-5">
+      <div className="w-full max-w-[428px] mx-auto flex flex-col flex-1 p-4">
         {/* Back button */}
         <div className="flex items-center">
           <Button
@@ -97,71 +97,73 @@ const JoinScreen = ({ initialCode }: { initialCode?: string }) => {
           </Button>
         </div>
 
-        {/* Title */}
-        <div className="flex flex-col items-center gap-1 pt-2">
-          <span className="text-5xl leading-none">🌊</span>
-          <h2 className="text-3xl font-black text-foreground">
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-y-auto flex flex-col gap-5 pt-2">
+          {/* Title */}
+          <h2 className="text-3xl font-black text-foreground text-center">
             {t('joinGame')}
           </h2>
-        </div>
 
-        {/* Avatar */}
-        <div className="space-y-2">
-          <label className="text-sm font-bold text-muted-foreground">
-            {t('chooseAvatar')}
-          </label>
-          <AvatarPicker selected={avatarId} onSelect={setAvatarId} />
-        </div>
-
-        {/* Game code */}
-        <div className="space-y-1.5">
-          <label className="text-sm font-bold text-muted-foreground">
-            {t('enterGameCode')}
-          </label>
-          <div className="relative">
-            <Input
-              value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase().slice(0, 6))}
-              maxLength={6}
-              className="h-12 text-center text-2xl font-black tracking-[0.3em] uppercase rounded-xl bg-card/60 border-border"
-            />
-            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              {statusIcon()}
-            </div>
+          {/* Avatar */}
+          <div className="space-y-2 text-center">
+            <label className="text-sm font-bold text-muted-foreground">
+              {t('chooseAvatar')}
+            </label>
+            <AvatarPicker selected={avatarId} onSelect={setAvatarId} />
           </div>
-          {hasError && (
-            <motion.div
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="rounded-lg bg-destructive/10 border border-destructive/20 px-3 py-2 text-xs text-destructive font-medium"
-            >
-              {codeStatus === 'not_found' && t('invalidLink')}
-              {codeStatus === 'finished' && t('gameEnded')}
-              {codeStatus === 'started' && t('gameStarted')}
-            </motion.div>
-          )}
+
+          {/* Game code */}
+          <div className="space-y-1.5 text-center">
+            <label className="text-sm font-bold text-muted-foreground">
+              {t('enterGameCode')}
+            </label>
+            <div className="relative">
+              <Input
+                value={code}
+                onChange={(e) => setCode(e.target.value.toUpperCase().slice(0, 6))}
+                maxLength={6}
+                className="h-12 text-center text-2xl font-black tracking-[0.3em] uppercase rounded-xl bg-card/60 border-border"
+              />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                {statusIcon()}
+              </div>
+            </div>
+            {hasError && (
+              <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="rounded-lg bg-destructive/10 border border-destructive/20 px-3 py-2 text-xs text-destructive font-medium"
+              >
+                {codeStatus === 'not_found' && t('invalidLink')}
+                {codeStatus === 'finished' && t('gameEnded')}
+                {codeStatus === 'started' && t('gameStarted')}
+              </motion.div>
+            )}
+          </div>
+
+          {/* Nickname */}
+          <TypewriterInput
+            placeholderText={t('enterNickname')}
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value.slice(0, 16))}
+            maxLength={16}
+            className="h-12 text-center text-lg font-bold rounded-xl bg-card/60 border-border"
+            onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
+          />
         </div>
 
-        {/* Nickname */}
-        <TypewriterInput
-          placeholderText={t('enterNickname')}
-          value={nickname}
-          onChange={(e) => setNickname(e.target.value.slice(0, 16))}
-          maxLength={16}
-          className="h-12 text-center text-lg font-bold rounded-xl bg-card/60 border-border"
-          onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
-        />
-
-        {/* Join button */}
-        <Button
-          size="lg"
-          className="h-14 text-lg font-extrabold rounded-2xl gap-2 mt-auto mb-6"
-          disabled={!canJoin}
-          onClick={handleJoin}
-        >
-          <LogIn className="w-5 h-5" />
-          {loading ? t('checkingRoom') : t('joinRoom')}
-        </Button>
+        {/* Join button - sticky bottom */}
+        <div className="sticky bottom-0 bg-background pt-3 pb-4">
+          <Button
+            size="lg"
+            className="w-full h-14 text-lg font-extrabold rounded-2xl gap-2"
+            disabled={!canJoin}
+            onClick={handleJoin}
+          >
+            <LogIn className="w-5 h-5" />
+            {loading ? t('checkingRoom') : t('joinRoom')}
+          </Button>
+        </div>
       </div>
     </motion.div>
   );
