@@ -96,7 +96,7 @@ const CreateScreen = () => {
         </div>
 
         {/* Create button - sticky bottom */}
-        <div className="sticky bottom-0 bg-background pt-3 pb-4">
+        <div className="sticky bottom-0 bg-background pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
           <Button
             size="lg"
             className="w-full h-14 text-lg font-extrabold rounded-2xl gap-2"
