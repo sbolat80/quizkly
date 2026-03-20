@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Globe, Zap, Users } from 'lucide-react';
+import { Globe, Zap, Users, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useI18n } from '@/i18n';
 import { useGameStore } from '@/stores/gameStore';
@@ -21,21 +21,28 @@ const HomeScreen = () => {
       className="min-h-screen flex flex-col items-center justify-center bg-background relative overflow-hidden px-6"
     >
       {/* Top-right controls */}
-      <div className="absolute top-4 right-4 flex items-center gap-2">
-        <button
-          onClick={toggleTheme}
-          className="flex items-center justify-center w-9 h-9 rounded-lg bg-muted/10 text-muted-foreground hover:text-foreground transition-colors text-lg"
-          aria-label="Toggle theme"
-        >
-          {theme === 'dark' ? '☀️' : '🌙'}
-        </button>
-        <button
-          onClick={toggleLang}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/10 text-muted-foreground hover:text-foreground transition-colors text-sm font-bold"
-        >
-          <Globe className="w-4 h-4" />
-          {lang === 'en' ? '🇬🇧' : '🇹🇷'} {lang.toUpperCase()}
-        </button>
+      <div className="absolute top-4 right-4">
+        <div className="flex items-center rounded-full px-3 py-1.5 backdrop-blur-sm border transition-all duration-200 hover:brightness-110 bg-black/[0.06] border-black/[0.12] dark:bg-white/10 dark:border-white/20">
+          <button
+            onClick={toggleTheme}
+            className="flex items-center justify-center w-7 h-7 rounded-full transition-colors"
+            aria-label="Toggle theme"
+          >
+            {theme === 'dark' ? (
+              <Sun className="w-4 h-4 text-white/70" />
+            ) : (
+              <Moon className="w-4 h-4" style={{ color: '#4C1D95' }} />
+            )}
+          </button>
+          <div className="w-px h-4 mx-2 bg-black/[0.12] dark:bg-white/20" />
+          <button
+            onClick={toggleLang}
+            className="flex items-center gap-1.5 text-sm font-bold transition-colors text-foreground/70 hover:text-foreground"
+          >
+            <Globe className="w-3.5 h-3.5" />
+            {lang === 'en' ? '🇬🇧' : '🇹🇷'} {lang.toUpperCase()}
+          </button>
+        </div>
       </div>
 
       {/* Logo */}
