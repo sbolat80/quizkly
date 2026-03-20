@@ -60,7 +60,7 @@ const HomeScreen = () => {
         <img
           src={QuizklyLogo}
           alt="Quizkly"
-          className="h-40 md:h-48 w-auto object-contain dark:brightness-100 brightness-0"
+          className="h-48 w-auto object-contain"
         />
       </motion.div>
 
