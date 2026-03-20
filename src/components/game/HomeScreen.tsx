@@ -100,7 +100,7 @@ const HomeScreen = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.7, duration: 0.6 }}
-        className="absolute bottom-6 text-xs font-bold text-foreground/40"
+        className="absolute bottom-6 text-xs font-bold text-[#6D28D9] dark:text-white/40"
       >
         🦑 inkzy.gg
       </motion.p>
