@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useI18n } from '@/i18n';
 import { useGameStore } from '@/stores/gameStore';
 import { useTheme } from '@/hooks/use-theme';
+import QuizklyLogo from '@/assets/quizkly-logo.svg';
 
 const HomeScreen = () => {
   const { t, lang, setLang } = useI18n();
@@ -47,16 +48,20 @@ const HomeScreen = () => {
 
       {/* Logo */}
       <motion.div
-        initial={{ scale: 0.4, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: 'spring', stiffness: 180, damping: 14 }}
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1, y: [0, -6, 0] }}
+        transition={{
+          scale: { type: 'spring', stiffness: 200, damping: 15 },
+          opacity: { type: 'spring', stiffness: 200, damping: 15 },
+          y: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
+        }}
         className="flex flex-col items-center"
       >
-        <h1 className="text-5xl md:text-6xl font-black tracking-tight leading-none">
-          <span className="text-primary text-glow-primary">Quiz</span>
-          <span style={{ color: '#EC4899' }}>kly</span>
-        </h1>
-        <span className="text-5xl mt-3">🎮</span>
+        <img
+          src={QuizklyLogo}
+          alt="Quizkly"
+          className="h-32 w-auto dark:brightness-100 brightness-0"
+        />
       </motion.div>
 
       {/* Tagline */}
