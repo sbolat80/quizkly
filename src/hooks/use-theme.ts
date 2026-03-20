@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 type Theme = 'dark' | 'light';
-const STORAGE_KEY = 'inkzy_theme';
+const STORAGE_KEY = 'quizkly_theme';
 
 function getInitialTheme(): Theme {
   try {

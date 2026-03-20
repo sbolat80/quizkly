@@ -6,7 +6,7 @@ export type UILanguage = 'en' | 'tr';
 
 const translations = { en, tr } as const;
 
-const STORAGE_KEY = 'inkzy-ui-lang';
+const STORAGE_KEY = 'quizkly-ui-lang';
 
 export function getSavedUILanguage(): UILanguage {
   try {

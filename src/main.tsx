@@ -3,7 +3,7 @@ import App from "./App.tsx";
 import "./index.css";
 
 // Apply theme before React renders to prevent flash
-const savedTheme = localStorage.getItem('inkzy_theme');
+const savedTheme = localStorage.getItem('quizkly_theme');
 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 if (savedTheme === 'light' || (!savedTheme && !prefersDark)) {
   document.documentElement.classList.remove('dark');
