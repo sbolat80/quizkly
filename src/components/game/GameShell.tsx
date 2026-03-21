@@ -6,6 +6,8 @@ import JoinScreen from './JoinScreen';
 import WaitingRoom from './WaitingRoom';
 import CountdownScreen from './CountdownScreen';
 import QuestionScreen from './QuestionScreen';
+import RoundResult from './RoundResult';
+import InterimLeaderboard from './InterimLeaderboard';
 
 const PlaceholderScreen = ({ name }: { name: string }) => (
   <div className="min-h-screen flex items-center justify-center bg-background text-foreground font-bold">
