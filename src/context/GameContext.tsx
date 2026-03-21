@@ -1,8 +1,16 @@
 import React, { createContext, useContext, useEffect, useRef, useCallback } from 'react';
 import { useGameStore } from '@/stores/gameStore';
 import * as gameService from '@/services/gameService';
+import { getSessionId } from '@/lib/session';
+import gameConfig from '@/config/gameConfig';
 import type { GameScreen } from '@/types/game';
-import type { RealtimeChannel } from '@supabase/supabase-js';
+import { toast } from 'sonner';
+
+const PHASE_DURATIONS = {
+  question_active: gameConfig.QUESTION_TIME_SECONDS * 1000,
+  result_phase: gameConfig.RESULT_PHASE_MS,
+  leaderboard: gameConfig.LEADERBOARD_PHASE_MS,
+};
 
 interface GameContextType {
   createGame: (nickname: string, avatarId: number, language: string) => Promise<void>;
@@ -18,74 +26,174 @@ const GameContext = createContext<GameContextType | null>(null);
 
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const store = useGameStore();
-  const gameChannelRef = useRef<RealtimeChannel | null>(null);
-  const playerChannelRef = useRef<RealtimeChannel | null>(null);
+  const phaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const gameSubRef = useRef<any>(null);
+  const playerSubRef = useRef<any>(null);
+  const hasShownCountdownRef = useRef(false);
 
-  const cleanup = useCallback(() => {
-    gameChannelRef.current?.unsubscribe();
-    playerChannelRef.current?.unsubscribe();
-    gameChannelRef.current = null;
-    playerChannelRef.current = null;
+  const clearPhaseTimer = useCallback(() => {
+    if (phaseTimerRef.current) {
+      clearTimeout(phaseTimerRef.current);
+      phaseTimerRef.current = null;
+    }
   }, []);
 
+  const cleanupSubscriptions = useCallback(() => {
+    if (gameSubRef.current) {
+      gameSubRef.current.unsubscribe();
+      gameSubRef.current = null;
+    }
+    if (playerSubRef.current) {
+      playerSubRef.current.unsubscribe();
+      playerSubRef.current = null;
+    }
+  }, []);
+
+  const scheduleNextPhase = useCallback((updatedGame: any) => {
+    clearPhaseTimer();
+
+    const state = useGameStore.getState();
+    const isHost = state.currentPlayer?.is_host;
+    if (!isHost) return;
+
+    if (!updatedGame.phase_started_at || !updatedGame.phase) return;
+
+    const duration = PHASE_DURATIONS[updatedGame.phase as keyof typeof PHASE_DURATIONS];
+    if (!duration) return;
+
+    const elapsed = Date.now() - new Date(updatedGame.phase_started_at).getTime();
+    const remaining = Math.max(0, duration - elapsed);
+
+    phaseTimerRef.current = setTimeout(async () => {
+      try {
+        await gameService.advancePhase(updatedGame.id, {
+          question_time_ms: gameConfig.QUESTION_TIME_SECONDS * 1000,
+          result_phase_ms: gameConfig.RESULT_PHASE_MS,
+          leaderboard_ms: gameConfig.LEADERBOARD_PHASE_MS,
+        });
+      } catch (e) {
+        console.error('advancePhase failed:', e);
+      }
+    }, remaining);
+  }, [clearPhaseTimer]);
+
+  const resetPlayerAnswerState = useCallback(() => {
+    const prev = useGameStore.getState().currentPlayer;
+    if (prev) {
+      useGameStore.getState().setCurrentPlayer({
+        ...prev,
+        currentAnswer: null,
+        lastWasCorrect: null,
+        lastCorrectIndex: null,
+      });
+    }
+  }, []);
+
+  const loadQuestionsAndStartCountdown = useCallback(async (updatedGame: any) => {
+    if (hasShownCountdownRef.current) return;
+    hasShownCountdownRef.current = true;
+    try {
+      const gqs = await gameService.getGameQuestions(updatedGame.id);
+      const mapped = gqs.map((gq: any) => ({
+        id: gq.questions.id,
+        question_id: gq.questions.id,
+        text: gq.questions.question_text,
+        options: Array.isArray(gq.questions.options)
+          ? gq.questions.options
+          : JSON.parse(gq.questions.options),
+        correctAnswer: gq.questions.correct_answer,
+        category: gq.questions.category,
+        timeLimit: gameConfig.QUESTION_TIME_SECONDS,
+      }));
+      useGameStore.getState().setQuestions(mapped);
+      useGameStore.getState().setCurrentQuestionIndex(updatedGame.current_question_index ?? 0);
+      useGameStore.getState().setScreen('countdown');
+    } catch (e) {
+      console.error('loadQuestions failed:', e);
+      hasShownCountdownRef.current = false;
+    }
+  }, []);
+
+  const handleGameUpdate = useCallback(async (updatedGame: any) => {
+    const s = useGameStore.getState();
+    s.setGame(updatedGame);
+
+    if (updatedGame.status === 'finished') {
+      clearPhaseTimer();
+      s.setScreen('final');
+      return;
+    }
+
+    if (updatedGame.status === 'waiting') {
+      clearPhaseTimer();
+      hasShownCountdownRef.current = false;
+      s.setQuestions([]);
+      s.setCurrentQuestionIndex(0);
+      resetPlayerAnswerState();
+      const players = await gameService.getGamePlayers(updatedGame.id);
+      s.setPlayers(players);
+      s.setScreen('waiting');
+      return;
+    }
+
+    if (updatedGame.status === 'in_progress') {
+      if (!hasShownCountdownRef.current) {
+        await loadQuestionsAndStartCountdown(updatedGame);
+        return;
+      }
+
+      if (updatedGame.phase) {
+        const phase = updatedGame.phase;
+
+        if (phase === 'question_active') {
+          const newIdx = updatedGame.current_question_index ?? 0;
+          s.setCurrentQuestionIndex(newIdx);
+          resetPlayerAnswerState();
+          s.setScreen('question');
+        } else if (phase === 'result_phase') {
+          s.setScreen('round_result');
+        } else if (phase === 'leaderboard') {
+          const players = await gameService.getGamePlayers(updatedGame.id);
+          s.setPlayers(players);
+          s.setScreen('leaderboard');
+        }
+
+        scheduleNextPhase(updatedGame);
+      }
+    }
+  }, [clearPhaseTimer, loadQuestionsAndStartCountdown, resetPlayerAnswerState, scheduleNextPhase]);
+
   const setupSubscriptions = useCallback((gameId: string) => {
-    cleanup();
+    cleanupSubscriptions();
 
-    gameChannelRef.current = gameService.subscribeToGame(gameId, (game) => {
-      store.setGame(game);
+    gameSubRef.current = gameService.subscribeToGame(gameId, handleGameUpdate);
 
-      if (game.status === 'finished') {
-        store.setScreen('final');
-        return;
+    playerSubRef.current = gameService.subscribeToPlayers(gameId, (updatedPlayers) => {
+      const s = useGameStore.getState();
+      s.setPlayers(updatedPlayers);
+      const sessionId = getSessionId();
+      const me = updatedPlayers.find((p: any) => p.session_id === sessionId);
+      if (me) {
+        const prev = s.currentPlayer;
+        s.setCurrentPlayer(prev ? {
+          ...me,
+          currentAnswer: prev.currentAnswer ?? null,
+          lastWasCorrect: prev.lastWasCorrect ?? null,
+          lastCorrectIndex: prev.lastCorrectIndex ?? null,
+        } : me);
       }
-      if (game.status === 'waiting') {
-        store.setScreen('waiting');
-        return;
-      }
-
-      // For non-host: when game starts, load questions and show countdown
-      if (game.status === 'in_progress') {
-        const currentScreen = useGameStore.getState().screen;
-        const currentQuestions = useGameStore.getState().questions;
-
-        // First transition to in_progress → show countdown (only once)
-        if (currentScreen === 'waiting') {
-          gameService.getGameQuestions(game.id).then((questions) => {
-            store.setQuestions(questions);
-            store.setCurrentQuestionIndex(game.current_question_index ?? 0);
-            store.setScreen('countdown');
-          });
-          return;
-        }
-
-        switch (game.phase) {
-          case 'question_active':
-            store.setCurrentQuestionIndex(game.current_question_index ?? 0);
-            if (currentScreen !== 'countdown') {
-              store.setScreen('question');
-            }
-            break;
-          case 'result_phase':
-            store.setScreen('round_result');
-            break;
-          case 'leaderboard':
-            store.setScreen('leaderboard');
-            break;
-        }
-      }
-    });
-
-    playerChannelRef.current = gameService.subscribeToPlayers(gameId, (players) => {
-      store.setPlayers(players);
       const map: Record<string, number> = {};
-      players.forEach((p) => { map[p.id] = p.avatar_id ?? 1; });
-      store.setAvatarMap(map);
+      updatedPlayers.forEach((p: any) => { map[p.id] = p.avatar_id ?? 1; });
+      s.setAvatarMap(map);
     });
-  }, [cleanup, store]);
+  }, [cleanupSubscriptions, handleGameUpdate]);
 
   useEffect(() => {
-    return cleanup;
-  }, [cleanup]);
+    return () => {
+      clearPhaseTimer();
+      cleanupSubscriptions();
+    };
+  }, [clearPhaseTimer, cleanupSubscriptions]);
 
   const createGame = useCallback(async (nickname: string, avatarId: number, language: string) => {
     store.setLoading(true);
@@ -121,15 +229,14 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   }, [store, setupSubscriptions]);
 
   const startGameAction = useCallback(async () => {
-    const game = useGameStore.getState().game;
-    if (!game) return;
+    const { game, currentPlayer } = useGameStore.getState();
+    if (!game || !currentPlayer?.is_host) return;
     store.setLoading(true);
     try {
-      await gameService.startGame(game.id, game.language ?? 'en');
-      const questions = await gameService.getGameQuestions(game.id);
-      store.setQuestions(questions);
-      store.setCurrentQuestionIndex(0);
-      store.setScreen('countdown');
+      const gameLanguage = game.language || 'en';
+      await gameService.startGame(game.id, gameLanguage);
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to start game');
     } finally {
       store.setLoading(false);
     }
@@ -137,34 +244,75 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const submitAnswer = useCallback(async (optionIndex: number) => {
     const { game, currentPlayer, questions, currentQuestionIndex } = useGameStore.getState();
-    if (!game || !currentPlayer) return null;
+    if (!game || !currentPlayer || !questions.length) return null;
+
     const q = questions[currentQuestionIndex];
     if (!q) return null;
 
-    const questionId = q.question_id ?? q.id;
-    return gameService.submitAnswer(
-      game.id,
-      questionId,
-      currentPlayer.id,
-      currentPlayer.session_id,
-      String(optionIndex),
-      0
-    );
-  }, []);
+    const selectedOption = q.options[optionIndex];
+    const responseTimeMs = game?.phase_started_at
+      ? Date.now() - new Date(game.phase_started_at).getTime()
+      : 5000;
+
+    // Optimistic UI
+    store.setCurrentPlayer({
+      ...currentPlayer,
+      currentAnswer: optionIndex,
+    });
+
+    try {
+      const result = await gameService.submitAnswer(
+        game.id,
+        q.question_id ?? q.id,
+        currentPlayer.id,
+        getSessionId(),
+        selectedOption,
+        responseTimeMs
+      );
+      const latest = useGameStore.getState().currentPlayer;
+      store.setCurrentPlayer({
+        ...latest,
+        currentAnswer: optionIndex,
+        lastWasCorrect: result.is_correct,
+        lastCorrectIndex: result.correct_index,
+        score: (latest?.score ?? 0) + (result.points_awarded ?? 0),
+      });
+      return result;
+    } catch (e) {
+      console.error('submitAnswer failed:', e);
+      return null;
+    }
+  }, [store]);
 
   const goHome = useCallback(() => {
-    cleanup();
+    clearPhaseTimer();
+    cleanupSubscriptions();
+    hasShownCountdownRef.current = false;
     store.reset();
-  }, [cleanup, store]);
+  }, [clearPhaseTimer, cleanupSubscriptions, store]);
 
   const playAgain = useCallback(async () => {
-    const game = useGameStore.getState().game;
-    if (!game) return;
-    await gameService.resetGame(game.id);
+    const { game, currentPlayer } = useGameStore.getState();
+    if (!game?.id || !currentPlayer?.is_host) return;
+    try {
+      await gameService.resetGame(game.id);
+    } catch (e) {
+      console.error('resetGame failed:', e);
+    }
   }, []);
 
   const navigateTo = useCallback((screen: GameScreen) => {
     store.setScreen(screen);
+    if (screen === 'question') {
+      const { game, currentPlayer } = useGameStore.getState();
+      if (game && currentPlayer?.is_host) {
+        gameService.advancePhase(game.id, {
+          question_time_ms: gameConfig.QUESTION_TIME_SECONDS * 1000,
+          result_phase_ms: gameConfig.RESULT_PHASE_MS,
+          leaderboard_ms: gameConfig.LEADERBOARD_PHASE_MS,
+        }).catch(console.error);
+      }
+    }
   }, [store]);
 
   const value: GameContextType = {
