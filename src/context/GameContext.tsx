@@ -198,8 +198,19 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     cleanupSubscriptions();
 
     gameSubRef.current = gameService.subscribeToGame(gameId, async (updatedGame: any) => {
+      console.log('RAW subscription update:', {
+        status: updatedGame.status,
+        phase: updatedGame.phase,
+      });
       if (updatedGame.status === 'finished' || updatedGame.phase === 'finished') {
+        console.log('Finished from subscription!');
         clearPhaseTimer();
+        try {
+          const finalPlayers = await gameService.getGamePlayers(updatedGame.id);
+          useGameStore.getState().setPlayers(finalPlayers);
+        } catch (e) {
+          console.error(e);
+        }
         useGameStore.getState().setGame(updatedGame);
         useGameStore.getState().setScreen('final');
         return;
