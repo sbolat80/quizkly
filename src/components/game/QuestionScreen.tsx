@@ -37,7 +37,7 @@ const QuestionScreen = () => {
         exit={{ opacity: 0 }}
         className="min-h-screen flex items-center justify-center bg-background px-4"
       >
-        <p className="text-lg text-muted-foreground">{t.loadingQuestion}</p>
+        <p className="text-lg text-muted-foreground">{t('loadingQuestion')}</p>
       </motion.div>
     );
   }
@@ -70,7 +70,7 @@ const QuestionScreen = () => {
       {/* Top bar */}
       <div className="flex items-center justify-between mb-3">
         <span className="text-sm font-bold text-muted-foreground">
-          {t.question} {currentQuestionIndex + 1}/{questions.length}
+          {t('question')} {currentQuestionIndex + 1}/{questions.length}
         </span>
         <span className={`text-sm font-black tabular-nums ${isUrgent ? 'text-destructive' : 'text-foreground'}`}>
           {Math.ceil(timeLeft)}s
@@ -126,7 +126,7 @@ const QuestionScreen = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center text-sm text-muted-foreground mt-4 pb-4"
         >
-          ✅ {t.answerLocked}
+          ✅ {t('answerLocked')}
         </motion.p>
       )}
     </motion.div>

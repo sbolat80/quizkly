@@ -30,7 +30,7 @@ const CountdownScreen = () => {
       className="min-h-screen flex flex-col items-center justify-center bg-background px-4"
     >
       <p className="text-lg font-bold text-muted-foreground mb-8">
-        {t.getReady}
+        {t('getReady')}
       </p>
 
       <AnimatePresence mode="wait">
@@ -42,7 +42,7 @@ const CountdownScreen = () => {
           transition={{ duration: 0.3 }}
           className="text-9xl font-black text-primary"
         >
-          {count > 0 ? count : t.goExclamation}
+          {count > 0 ? count : t('goExclamation')}
         </motion.span>
       </AnimatePresence>
     </motion.div>
