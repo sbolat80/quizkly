@@ -72,8 +72,8 @@ const QuestionScreen = () => {
     await submitAnswer(index);
   };
 
-  const timerPercent = (timeLeft / effectiveTimeLimit) * 100;
-  const isUrgent = timeLeft < 5;
+  const displayTime = Math.ceil(timeLeft);
+  const timerPercent = Math.max(0, (timeLeft / effectiveTimeLimit) * 100);
 
   return (
     <motion.div
