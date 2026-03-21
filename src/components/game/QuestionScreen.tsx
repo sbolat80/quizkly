@@ -28,6 +28,7 @@ const QuestionScreen = () => {
 
   const questionData = questions[currentQuestionIndex];
   const question = questionData?.questions ?? questionData;
+  const questionText = question?.text || question?.question_text || 'Loading...';
 
   if (!question) {
     return (
