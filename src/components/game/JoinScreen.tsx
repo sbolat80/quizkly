@@ -62,7 +62,6 @@ const JoinScreen = ({ initialCode }: { initialCode?: string }) => {
     return () => clearTimeout(timeout);
   }, [code]);
 
-  const hasError = codeStatus === 'not_found' || codeStatus === 'finished' || codeStatus === 'started';
   const canJoin = code.length >= 3 && nickname.trim() && codeStatus === 'valid' && !loading;
 
   const handleJoin = async () => {
@@ -76,9 +75,6 @@ const JoinScreen = ({ initialCode }: { initialCode?: string }) => {
     switch (codeStatus) {
       case 'checking': return <span className="text-xs text-muted-foreground animate-pulse">{t('checkingRoom')}</span>;
       case 'valid': return <CheckCircle2 className="w-4 h-4 text-green-500" />;
-      case 'not_found': return <span className="flex items-center gap-1 text-xs text-destructive"><XCircle className="w-4 h-4" />{t('invalidLink')}</span>;
-      case 'finished': return <span className="flex items-center gap-1 text-xs text-destructive"><AlertCircle className="w-4 h-4" />{t('gameEnded')}</span>;
-      case 'started': return <span className="flex items-center gap-1 text-xs text-accent"><AlertCircle className="w-4 h-4" />{t('gameStarted')}</span>;
       default: return null;
     }
   };
