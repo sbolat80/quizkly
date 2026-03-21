@@ -28,6 +28,7 @@ const QuestionScreen = () => {
 
   const questionData = questions[currentQuestionIndex];
   const question = questionData?.questions ?? questionData;
+  const questionText = question?.text || question?.question_text || 'Loading...';
 
   if (!question) {
     return (
@@ -88,7 +89,7 @@ const QuestionScreen = () => {
 
       {/* Question text */}
       <h2 className="text-2xl font-extrabold text-foreground text-center leading-tight mb-8">
-        {question.question_text}
+        {questionText}
       </h2>
 
       {/* Answer buttons */}

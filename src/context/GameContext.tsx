@@ -94,17 +94,25 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     hasShownCountdownRef.current = true;
     try {
       const gqs = await gameService.getGameQuestions(updatedGame.id);
-      const mapped = gqs.map((gq: any) => ({
-        id: gq.questions.id,
-        question_id: gq.questions.id,
-        text: gq.questions.question_text,
-        options: Array.isArray(gq.questions.options)
-          ? gq.questions.options
-          : JSON.parse(gq.questions.options),
-        correctAnswer: gq.questions.correct_answer,
-        category: gq.questions.category,
-        timeLimit: gameConfig.QUESTION_TIME_SECONDS,
-      }));
+      console.log('Raw game questions:', JSON.stringify(gqs[0]));
+      const mapped = gqs.map((gq: any) => {
+        const q = gq.questions ?? gq;
+        const options = Array.isArray(q.options)
+          ? q.options.map((o: any) => String(o))
+          : typeof q.options === 'string'
+            ? JSON.parse(q.options)
+            : [];
+        return {
+          id: q.id,
+          question_id: q.id,
+          text: q.question_text ?? q.text ?? '',
+          options,
+          correctAnswer: q.correct_answer ?? '',
+          category: q.category ?? '',
+          timeLimit: gameConfig.QUESTION_TIME_SECONDS,
+        };
+      });
+      console.log('Mapped questions:', mapped);
       useGameStore.getState().setQuestions(mapped);
       useGameStore.getState().setCurrentQuestionIndex(updatedGame.current_question_index ?? 0);
       useGameStore.getState().setScreen('countdown');
@@ -115,6 +123,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const handleGameUpdate = useCallback(async (updatedGame: any) => {
+    console.log('Game update:', {
+      status: updatedGame.status,
+      phase: updatedGame.phase,
+      currentQuestionIndex: updatedGame.current_question_index,
+      totalQuestions: updatedGame.total_questions,
+    });
     const s = useGameStore.getState();
     s.setGame(updatedGame);
 
