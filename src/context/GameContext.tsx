@@ -66,11 +66,18 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
     phaseTimerRef.current = setTimeout(async () => {
       try {
-        await gameService.advancePhase(updatedGame.id, {
+        console.log('Calling advancePhase...');
+        const result = await gameService.advancePhase(updatedGame.id, {
           question_time_ms: gameConfig.QUESTION_TIME_SECONDS * 1000,
           result_phase_ms: gameConfig.RESULT_PHASE_MS,
           leaderboard_ms: gameConfig.LEADERBOARD_PHASE_MS,
         });
+        console.log('advancePhase result:', result);
+        if (result?.phase === 'finished') {
+          console.log('Phase finished from advancePhase!');
+          clearPhaseTimer();
+          useGameStore.getState().setScreen('final');
+        }
       } catch (e) {
         console.error('advancePhase failed:', e);
       }
@@ -124,16 +131,17 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const handleGameUpdate = useCallback(async (updatedGame: any) => {
-    console.log('Game update:', {
+    console.log('=== GAME UPDATE ===', {
       status: updatedGame.status,
       phase: updatedGame.phase,
-      currentQuestionIndex: updatedGame.current_question_index,
-      totalQuestions: updatedGame.total_questions,
+      currentIdx: updatedGame.current_question_index,
+      totalQ: updatedGame.total_questions,
     });
     const s = useGameStore.getState();
     s.setGame(updatedGame);
 
-    if (updatedGame.status === 'finished') {
+    if (updatedGame.status === 'finished' || updatedGame.phase === 'finished') {
+      console.log('Game finished! Going to final.');
       clearPhaseTimer();
       s.setScreen('final');
       return;
@@ -181,7 +189,15 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const setupSubscriptions = useCallback((gameId: string) => {
     cleanupSubscriptions();
 
-    gameSubRef.current = gameService.subscribeToGame(gameId, handleGameUpdate);
+    gameSubRef.current = gameService.subscribeToGame(gameId, async (updatedGame: any) => {
+      if (updatedGame.status === 'finished' || updatedGame.phase === 'finished') {
+        clearPhaseTimer();
+        useGameStore.getState().setGame(updatedGame);
+        useGameStore.getState().setScreen('final');
+        return;
+      }
+      await handleGameUpdate(updatedGame);
+    });
 
     playerSubRef.current = gameService.subscribeToPlayers(gameId, (updatedPlayers) => {
       const s = useGameStore.getState();

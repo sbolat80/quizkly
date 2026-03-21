@@ -25,20 +25,24 @@ export async function createGame(nickname: string, avatarId: number, language: s
     .single();
   if (gameErr || !game) throw new Error('Could not create game');
 
-  // Create game_settings with defaults
+  // Create game_settings with dynamic category distribution
+  const questionsPerGame = gameConfig.QUESTIONS_PER_GAME;
+  const categories = ['general', 'science', 'math', 'sports', 'music'];
+  const perCategory = Math.floor(questionsPerGame / categories.length);
+  const remainder = questionsPerGame % categories.length;
+  const categoryDist: Record<string, number> = {};
+  categories.forEach((cat, i) => {
+    categoryDist[cat] = perCategory + (i < remainder ? 1 : 0);
+  });
+  console.log('Category distribution:', categoryDist, 'Total:', Object.values(categoryDist).reduce((a, b) => a + b, 0));
+
   await supabase
     .from('game_settings')
     .insert({
       game_id: game.id,
-      questions_per_game: gameConfig.QUESTIONS_PER_GAME,
+      questions_per_game: questionsPerGame,
       question_time_seconds: gameConfig.QUESTION_TIME_SECONDS,
-      category_distribution: {
-        general: 2,
-        science: 2,
-        math: 2,
-        sports: 2,
-        music: 2,
-      },
+      category_distribution: categoryDist,
     });
 
   const { data: player, error: playerErr } = await supabase
@@ -145,8 +149,27 @@ export async function startGame(gameId: string, language: string) {
   // Read settings from DB
   const settings = await getGameSettings(gameId);
   const needed = settings.questions_per_game;
-  const categoryDist = (settings.category_distribution ?? {}) as Record<string, number>;
-  console.log('Game settings:', settings);
+  const rawDist = (settings.category_distribution ?? {}) as Record<string, number>;
+  
+  // Adjust distribution if total exceeds needed
+  const distTotal = Object.values(rawDist).reduce((a: number, b: number) => a + b, 0);
+  const categoryDist: Record<string, number> = {};
+  if (distTotal > needed) {
+    let remaining = needed;
+    const cats = Object.entries(rawDist);
+    cats.forEach(([cat, count], i) => {
+      if (i === cats.length - 1) {
+        categoryDist[cat] = remaining;
+      } else {
+        const adjusted = Math.floor((count / distTotal) * needed);
+        categoryDist[cat] = adjusted;
+        remaining -= adjusted;
+      }
+    });
+  } else {
+    Object.assign(categoryDist, rawDist);
+  }
+  console.log('Game settings:', settings, 'Adjusted distribution:', categoryDist, 'Needed:', needed);
 
   // Check if questions already inserted
   const { count: existing } = await supabase

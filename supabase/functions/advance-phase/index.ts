@@ -90,7 +90,8 @@ Deno.serve(async (req) => {
           })
           .eq('id', gameId)
 
-        return new Response(JSON.stringify({ phase: 'finished', question_index: currentIdx }), {
+        console.log('Game finished:', gameId)
+        return new Response(JSON.stringify({ phase: 'finished', status: 'finished', question_index: currentIdx }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
       } else {
