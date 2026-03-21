@@ -73,8 +73,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           leaderboard_ms: gameConfig.LEADERBOARD_PHASE_MS,
         });
         console.log('advancePhase result:', result);
-        if (result?.phase === 'finished') {
-          console.log('Phase finished from advancePhase!');
+        if (result?.phase === 'finished' || result?.status === 'finished') {
+          console.log('GAME FINISHED from advancePhase!');
           clearPhaseTimer();
           useGameStore.getState().setScreen('final');
         }
