@@ -33,21 +33,19 @@ const InterimLeaderboard = () => {
       exit={{ opacity: 0 }}
       className="flex min-h-screen flex-col items-center px-6 py-8"
     >
-      {/* Header */}
       <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         className="mt-6 text-center"
       >
         <h2 className="text-3xl font-black text-foreground">
-          {t.leaderboard}
+          {t('leaderboard')}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          {t.question} {currentQuestionIndex + 1} / {totalQuestions}
+          {t('question')} {currentQuestionIndex + 1} / {totalQuestions}
         </p>
       </motion.div>
 
-      {/* Player list */}
       <div className="mt-8 w-full max-w-sm flex flex-col gap-2">
         {sorted.map((player, i) => {
           const isMe = player.id === currentPlayer?.id;
@@ -65,12 +63,10 @@ const InterimLeaderboard = () => {
                   : 'bg-card'
               }`}
             >
-              {/* Rank / medal */}
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-black text-primary-foreground">
                 {i < 3 ? medals[i] : i + 1}
               </span>
 
-              {/* Avatar */}
               <motion.img
                 src={avatar.image}
                 alt={avatar.nameKey}
@@ -80,17 +76,15 @@ const InterimLeaderboard = () => {
                 className="h-8 w-8 rounded-full object-contain"
               />
 
-              {/* Name */}
               <span className="flex-1 text-base font-bold text-card-foreground">
                 {player.nickname}
                 {isMe && (
                   <span className="ml-2 text-xs font-semibold text-muted-foreground">
-                    {t.you}
+                    {t('you')}
                   </span>
                 )}
               </span>
 
-              {/* Score */}
               <span className="text-base font-black text-primary">
                 {player.score ?? 0}
               </span>
@@ -99,9 +93,8 @@ const InterimLeaderboard = () => {
         })}
       </div>
 
-      {/* Footer message */}
       <p className="mt-auto pb-4 text-sm text-muted-foreground">
-        {isLastQuestion ? t.gameEndingSoon : t.nextQuestionComing}
+        {isLastQuestion ? t('gameEndingSoon') : t('nextQuestionComing')}
       </p>
     </motion.div>
   );

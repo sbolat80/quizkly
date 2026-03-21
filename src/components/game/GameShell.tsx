@@ -30,8 +30,8 @@ const GameShell = ({ initialCode }: GameShellProps) => {
       case 'waiting': return <WaitingRoom key="waiting" />;
       case 'countdown': return <CountdownScreen key="countdown" />;
       case 'question': return <QuestionScreen key="question" />;
-      case 'round_result': return <PlaceholderScreen key="round_result" name="RoundResult" />;
-      case 'leaderboard': return <PlaceholderScreen key="leaderboard" name="InterimLeaderboard" />;
+      case 'round_result': return <RoundResult key="round_result" />;
+      case 'leaderboard': return <InterimLeaderboard key="leaderboard" />;
       case 'final': return <PlaceholderScreen key="final" name="FinalLeaderboard" />;
       default: return <HomeScreen key="home" />;
     }

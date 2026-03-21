@@ -34,7 +34,6 @@ const RoundResult = () => {
     else playTimeUp();
   }, [playerAnswered, isCorrect]);
 
-  // Avatar animations per state
   const avatarAnimate = playerAnswered
     ? isCorrect
       ? { y: [0, -20, 0, -10, 0] }
@@ -60,7 +59,6 @@ const RoundResult = () => {
         transition={{ type: 'spring', stiffness: 220 }}
         className="flex flex-col items-center gap-4 text-center"
       >
-        {/* Avatar */}
         <motion.img
           src={avatar.image}
           alt={avatar.nameKey}
@@ -69,52 +67,47 @@ const RoundResult = () => {
           className="h-24 w-24 object-contain"
         />
 
-        {/* Time's up */}
         {!playerAnswered && (
           <>
             <Clock className="h-10 w-10 text-muted-foreground" />
             <h2 className="text-3xl font-black text-muted-foreground">
-              {t.timesUp}
+              {t('timesUp')}
             </h2>
             <p className="text-sm text-muted-foreground">
-              {t.didntAnswer}
+              {t('didntAnswer')}
             </p>
           </>
         )}
 
-        {/* Correct */}
         {playerAnswered && isCorrect && (
           <>
             <CheckCircle className="h-10 w-10 text-green-500" />
             <h2 className="text-3xl font-black text-green-500">
-              {t.correct}
+              {t('correct')}
             </h2>
           </>
         )}
 
-        {/* Wrong */}
         {playerAnswered && !isCorrect && (
           <>
             <XCircle className="h-10 w-10 text-destructive" />
             <h2 className="text-3xl font-black text-destructive">
-              {t.wrong}
+              {t('wrong')}
             </h2>
           </>
         )}
 
-        {/* Correct answer display */}
         {correctAnswerText && (
           <p className="mt-1 text-base font-semibold text-muted-foreground">
-            {t.correctAnswer}{' '}
+            {t('correctAnswer')}{' '}
             <span className="font-black text-foreground">
               {correctAnswerText}
             </span>
           </p>
         )}
 
-        {/* Footer message */}
         <p className="mt-4 text-sm text-muted-foreground">
-          {t.leaderboardComingUp}
+          {t('leaderboardComingUp')}
         </p>
       </motion.div>
     </motion.div>
