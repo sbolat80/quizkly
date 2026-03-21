@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
     )
 
     const body = await req.json()
-    const { gameId, question_time_ms = 15000, result_phase_ms = 3000, leaderboard_ms = 4000 } = body
+    const { gameId, result_phase_ms = 3000, leaderboard_ms = 4000 } = body
 
     if (!gameId) {
       return new Response(JSON.stringify({ error: 'gameId required' }), {
@@ -46,6 +46,16 @@ Deno.serve(async (req) => {
       })
     }
 
+    // Read game_settings for question time
+    const { data: settings } = await supabase
+      .from('game_settings')
+      .select('question_time_seconds, questions_per_game')
+      .eq('game_id', gameId)
+      .maybeSingle()
+
+    const questionTimeSec = settings?.question_time_seconds ?? 15
+    const questionTimeMs = body.question_time_ms ?? questionTimeSec * 1000
+
     // Get actual question count from game_questions table
     const { count: actualTotal } = await supabase
       .from('game_questions')
@@ -58,7 +68,7 @@ Deno.serve(async (req) => {
     const currentIdx = game.current_question_index ?? 0
     const now = new Date().toISOString()
 
-    console.log('advance-phase:', { currentPhase, currentIdx, totalQuestions, actualTotal })
+    console.log('advance-phase:', { currentPhase, currentIdx, totalQuestions, actualTotal, questionTimeMs, settings })
 
     let nextPhase: string
     let nextIdx = currentIdx

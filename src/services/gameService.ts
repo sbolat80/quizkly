@@ -25,6 +25,22 @@ export async function createGame(nickname: string, avatarId: number, language: s
     .single();
   if (gameErr || !game) throw new Error('Could not create game');
 
+  // Create game_settings with defaults
+  await supabase
+    .from('game_settings')
+    .insert({
+      game_id: game.id,
+      questions_per_game: gameConfig.QUESTIONS_PER_GAME,
+      question_time_seconds: gameConfig.QUESTION_TIME_SECONDS,
+      category_distribution: {
+        general: 2,
+        science: 2,
+        math: 2,
+        sports: 2,
+        music: 2,
+      },
+    });
+
   const { data: player, error: playerErr } = await supabase
     .from('players')
     .insert({
@@ -95,6 +111,29 @@ export async function getGamePlayers(gameId: string) {
   return data ?? [];
 }
 
+export async function getGameSettings(gameId: string) {
+  const { data, error } = await supabase
+    .from('game_settings')
+    .select('*')
+    .eq('game_id', gameId)
+    .maybeSingle();
+
+  if (error || !data) {
+    return {
+      questions_per_game: gameConfig.QUESTIONS_PER_GAME,
+      question_time_seconds: gameConfig.QUESTION_TIME_SECONDS,
+      category_distribution: {
+        general: 2,
+        science: 2,
+        math: 2,
+        sports: 2,
+        music: 2,
+      },
+    };
+  }
+  return data;
+}
+
 export async function startGame(gameId: string, language: string) {
   const { data: game } = await supabase
     .from('games')
@@ -103,46 +142,94 @@ export async function startGame(gameId: string, language: string) {
     .single();
   if (game?.status !== 'waiting') throw new Error('Game is not in waiting state');
 
-  const categories = ['general', 'geography', 'science', 'math', 'sports', 'culture'];
-  const perCategory = Math.floor(gameConfig.QUESTIONS_PER_GAME / categories.length);
-  const remainder = gameConfig.QUESTIONS_PER_GAME % categories.length;
+  // Read settings from DB
+  const settings = await getGameSettings(gameId);
+  const needed = settings.questions_per_game;
+  const categoryDist = (settings.category_distribution ?? {}) as Record<string, number>;
+  console.log('Game settings:', settings);
 
-  const selectedQuestions: any[] = [];
+  // Check if questions already inserted
+  const { count: existing } = await supabase
+    .from('game_questions')
+    .select('*', { count: 'exact', head: true })
+    .eq('game_id', gameId);
 
-  for (let i = 0; i < categories.length; i++) {
-    const count = perCategory + (i < remainder ? 1 : 0);
-    if (count === 0) continue;
-
-    const { data } = await supabase
+  if ((existing ?? 0) === 0) {
+    const { data: allQuestions, error: qErr } = await supabase
       .from('questions')
-      .select()
-      .eq('language', language)
-      .eq('category', categories[i])
-      .eq('is_active', true);
+      .select('id, category')
+      .eq('is_active', true)
+      .eq('language', language);
 
-    const shuffled = shuffle(data ?? []);
-    selectedQuestions.push(...shuffled.slice(0, count));
+    if (qErr || !allQuestions) throw new Error('Failed to fetch questions');
+    if (allQuestions.length < needed) {
+      throw new Error(`Not enough questions. Found: ${allQuestions.length}, needed: ${needed}`);
+    }
+
+    // Group by category
+    const categoryGroups: Record<string, typeof allQuestions> = {};
+    for (const q of allQuestions) {
+      if (!categoryGroups[q.category]) categoryGroups[q.category] = [];
+      categoryGroups[q.category].push(q);
+    }
+    for (const cat of Object.keys(categoryGroups)) {
+      categoryGroups[cat] = shuffle(categoryGroups[cat]);
+    }
+
+    // Select by category_distribution
+    const selected: typeof allQuestions = [];
+    const selectedIds = new Set<string>();
+
+    for (const [cat, count] of Object.entries(categoryDist)) {
+      const pool = categoryGroups[cat] || [];
+      let picked = 0;
+      for (const q of pool) {
+        if (picked >= count) break;
+        if (!selectedIds.has(q.id)) {
+          selected.push(q);
+          selectedIds.add(q.id);
+          picked++;
+        }
+      }
+    }
+
+    // Fill remaining from any category
+    if (selected.length < needed) {
+      const remaining = shuffle(allQuestions.filter(q => !selectedIds.has(q.id)));
+      for (const q of remaining) {
+        if (selected.length >= needed) break;
+        selected.push(q);
+        selectedIds.add(q.id);
+      }
+    }
+
+    console.log(`Selected ${selected.length} questions:`, selected.map(q => q.category));
+
+    const shuffled = shuffle(selected);
+    const { error: insertErr } = await supabase
+      .from('game_questions')
+      .insert(shuffled.map((q, i) => ({
+        game_id: gameId,
+        question_id: q.id,
+        question_order: i + 1,
+      })));
+    if (insertErr) throw insertErr;
   }
 
-  const finalQuestions = shuffle(selectedQuestions);
-
-  const gameQuestionRows = finalQuestions.map((q, i) => ({
-    game_id: gameId,
-    question_id: q.id,
-    question_order: i,
-  }));
-
-  const { error: gqErr } = await supabase
+  // Get real count
+  const { count: realCount } = await supabase
     .from('game_questions')
-    .insert(gameQuestionRows);
-  if (gqErr) throw gqErr;
+    .select('*', { count: 'exact', head: true })
+    .eq('game_id', gameId);
+
+  console.log('Total questions in DB:', realCount);
 
   const { error: updateErr } = await supabase
     .from('games')
     .update({
       status: 'in_progress',
       current_question_index: 0,
-      total_questions: finalQuestions.length,
+      total_questions: realCount ?? needed,
       started_at: new Date().toISOString(),
     })
     .eq('id', gameId);

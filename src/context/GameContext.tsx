@@ -95,6 +95,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     try {
       const gqs = await gameService.getGameQuestions(updatedGame.id);
       console.log('Raw game questions:', JSON.stringify(gqs[0]));
+      const settings = await gameService.getGameSettings(updatedGame.id);
       const mapped = gqs.map((gq: any) => {
         const q = gq.questions ?? gq;
         const options = Array.isArray(q.options)
@@ -109,7 +110,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           options,
           correctAnswer: q.correct_answer ?? '',
           category: q.category ?? '',
-          timeLimit: gameConfig.QUESTION_TIME_SECONDS,
+          timeLimit: settings.question_time_seconds,
         };
       });
       console.log('Mapped questions:', mapped);

@@ -59,7 +59,7 @@ const QuestionScreen = () => {
     await submitAnswer(index);
   };
 
-  const timerPercent = (timeLeft / gameConfig.QUESTION_TIME_SECONDS) * 100;
+  const timerPercent = (timeLeft / effectiveTimeLimit) * 100;
   const isUrgent = timeLeft < 5;
 
   return (
