@@ -89,9 +89,15 @@ const QuestionScreen = () => {
         <span className="text-sm font-bold text-muted-foreground">
           {t('question')} {currentQuestionIndex + 1}/{questions.length}
         </span>
-        <span className={`text-sm font-black tabular-nums ${isUrgent ? 'text-destructive' : 'text-foreground'}`}>
-          {Math.ceil(timeLeft)}s
-        </span>
+        <motion.span
+          key={displayTime}
+          initial={{ scale: 1.2, opacity: 0.7 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.2 }}
+          className={`text-2xl font-black tabular-nums ${getTimeColor(timeLeft, effectiveTimeLimit)} ${timeLeft <= 5 ? 'animate-pulse' : ''}`}
+        >
+          {displayTime}s
+        </motion.span>
       </div>
 
       {/* Timer bar */}
