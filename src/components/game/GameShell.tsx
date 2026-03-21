@@ -33,7 +33,7 @@ const GameShell = ({ initialCode }: GameShellProps) => {
       case 'question': return <QuestionScreen key="question" />;
       case 'round_result': return <RoundResult key="round_result" />;
       case 'leaderboard': return <InterimLeaderboard key="leaderboard" />;
-      case 'final': return <PlaceholderScreen key="final" name="FinalLeaderboard" />;
+      case 'final': return <FinalLeaderboard key="final" />;
       default: return <HomeScreen key="home" />;
     }
   };

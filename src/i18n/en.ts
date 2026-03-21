@@ -46,7 +46,7 @@ const en = {
   nextQuestionComing: "Next question coming...",
   gameEndingSoon: "Game ending soon...",
   gameOver: "Game Over",
-  congratulations: "Congratulations!",
+  congratulations: "Congratulations, {name}!",
   pts: "pts",
   playAgain: "Play Again",
   newGame: "New Game",
