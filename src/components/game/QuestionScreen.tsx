@@ -101,10 +101,10 @@ const QuestionScreen = () => {
       </div>
 
       {/* Timer bar */}
-      <div className="h-3 w-full rounded-full bg-secondary overflow-hidden mb-6">
+      <div className="mb-6 h-3 w-full overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
         <div
-          className={`h-full rounded-full transition-all duration-500 ease-linear ${isUrgent ? 'bg-destructive' : 'bg-primary'}`}
-          style={{ width: `${timerPercent}%` }}
+          className={`h-full rounded-full ${getBarColor(timeLeft, effectiveTimeLimit)}`}
+          style={{ width: `${timerPercent}%`, transition: 'width 1s linear, background-color 0.5s ease' }}
         />
       </div>
 
