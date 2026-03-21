@@ -107,9 +107,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     if (!game) return;
     store.setLoading(true);
     try {
+      await gameService.startGame(game.id, game.language ?? 'en');
       const questions = await gameService.getGameQuestions(game.id);
       store.setQuestions(questions);
-      await gameService.startGame(game.id, game.language ?? 'en');
+      store.setCurrentQuestionIndex(0);
+      store.setScreen('countdown');
     } finally {
       store.setLoading(false);
     }
