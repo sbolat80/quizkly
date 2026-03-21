@@ -25,6 +25,7 @@ const JoinScreen = ({ initialCode }: { initialCode?: string }) => {
   const [nickname, setNickname] = useState('');
   const [avatarId, setAvatarId] = useState(1);
   const [codeStatus, setCodeStatus] = useState<CodeStatus>(initialCode ? 'checking' : 'idle');
+  const [linkError, setLinkError] = useState<string | null>(null);
 
   useEffect(() => {
     if (code.length < 3) {
