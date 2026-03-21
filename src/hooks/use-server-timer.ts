@@ -24,7 +24,7 @@ export function useServerTimer(phaseStartedAt: string | null, duration: number):
       if (remaining <= 0 && intervalRef.current) {
         clearInterval(intervalRef.current);
       }
-    }, 500);
+    }, 1000);
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
