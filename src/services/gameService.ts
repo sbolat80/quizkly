@@ -178,9 +178,18 @@ export async function submitAnswer(
   return data as { is_correct: boolean; points_awarded: number; correct_index: number };
 }
 
-export async function advancePhase(gameId: string) {
+export async function advancePhase(gameId: string, config?: {
+  question_time_ms?: number;
+  result_phase_ms?: number;
+  leaderboard_ms?: number;
+}) {
   const { data, error } = await supabase.functions.invoke('advance-phase', {
-    body: { gameId },
+    body: {
+      gameId,
+      question_time_ms: config?.question_time_ms ?? gameConfig.QUESTION_TIME_SECONDS * 1000,
+      result_phase_ms: config?.result_phase_ms ?? gameConfig.RESULT_PHASE_MS,
+      leaderboard_ms: config?.leaderboard_ms ?? gameConfig.LEADERBOARD_PHASE_MS,
+    },
   });
   if (error) throw error;
   return data as { phase: string; question_index: number };
