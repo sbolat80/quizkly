@@ -43,17 +43,35 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      switch (game.phase) {
-        case 'question_active':
-          store.setCurrentQuestionIndex(game.current_question_index ?? 0);
-          store.setScreen('question');
-          break;
-        case 'result_phase':
-          store.setScreen('round_result');
-          break;
-        case 'leaderboard':
-          store.setScreen('leaderboard');
-          break;
+      // For non-host: when game starts, load questions and show countdown
+      if (game.status === 'in_progress') {
+        const currentScreen = useGameStore.getState().screen;
+        const currentQuestions = useGameStore.getState().questions;
+
+        // First transition to in_progress → show countdown (only once)
+        if (currentScreen === 'waiting') {
+          gameService.getGameQuestions(game.id).then((questions) => {
+            store.setQuestions(questions);
+            store.setCurrentQuestionIndex(game.current_question_index ?? 0);
+            store.setScreen('countdown');
+          });
+          return;
+        }
+
+        switch (game.phase) {
+          case 'question_active':
+            store.setCurrentQuestionIndex(game.current_question_index ?? 0);
+            if (currentScreen !== 'countdown') {
+              store.setScreen('question');
+            }
+            break;
+          case 'result_phase':
+            store.setScreen('round_result');
+            break;
+          case 'leaderboard':
+            store.setScreen('leaderboard');
+            break;
+        }
       }
     });
 
@@ -107,9 +125,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     if (!game) return;
     store.setLoading(true);
     try {
+      await gameService.startGame(game.id, game.language ?? 'en');
       const questions = await gameService.getGameQuestions(game.id);
       store.setQuestions(questions);
-      await gameService.startGame(game.id, game.language ?? 'en');
+      store.setCurrentQuestionIndex(0);
+      store.setScreen('countdown');
     } finally {
       store.setLoading(false);
     }

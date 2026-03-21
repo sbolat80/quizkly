@@ -30,6 +30,7 @@ const tr = {
   minPlayersHint: "En az 2 oyuncu gerekli",
   waitingForHost: "Ev sahibinin başlatması bekleniyor...",
   getReady: "Hazır ol!",
+  goExclamation: "BAŞLA!",
   question: "Soru",
   answerLocked: "Cevap kilitlendi!",
   loadingQuestion: "Soru yükleniyor...",

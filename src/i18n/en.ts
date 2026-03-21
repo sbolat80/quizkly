@@ -30,6 +30,7 @@ const en = {
   minPlayersHint: "At least 2 players needed",
   waitingForHost: "Waiting for host to start...",
   getReady: "Get ready!",
+  goExclamation: "GO!",
   question: "Question",
   answerLocked: "Answer locked!",
   loadingQuestion: "Loading question...",

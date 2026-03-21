@@ -4,6 +4,8 @@ import HomeScreen from './HomeScreen';
 import CreateScreen from './CreateScreen';
 import JoinScreen from './JoinScreen';
 import WaitingRoom from './WaitingRoom';
+import CountdownScreen from './CountdownScreen';
+import QuestionScreen from './QuestionScreen';
 
 const PlaceholderScreen = ({ name }: { name: string }) => (
   <div className="min-h-screen flex items-center justify-center bg-background text-foreground font-bold">
@@ -24,8 +26,8 @@ const GameShell = ({ initialCode }: GameShellProps) => {
       case 'create': return <CreateScreen key="create" />;
       case 'join': return <JoinScreen key="join" initialCode={initialCode} />;
       case 'waiting': return <WaitingRoom key="waiting" />;
-      case 'countdown': return <PlaceholderScreen key="countdown" name="CountdownScreen" />;
-      case 'question': return <PlaceholderScreen key="question" name="QuestionScreen" />;
+      case 'countdown': return <CountdownScreen key="countdown" />;
+      case 'question': return <QuestionScreen key="question" />;
       case 'round_result': return <PlaceholderScreen key="round_result" name="RoundResult" />;
       case 'leaderboard': return <PlaceholderScreen key="leaderboard" name="InterimLeaderboard" />;
       case 'final': return <PlaceholderScreen key="final" name="FinalLeaderboard" />;
