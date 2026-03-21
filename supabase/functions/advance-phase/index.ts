@@ -46,45 +46,50 @@ Deno.serve(async (req) => {
       })
     }
 
+    // Get actual question count from game_questions table
+    const { count: actualTotal } = await supabase
+      .from('game_questions')
+      .select('*', { count: 'exact', head: true })
+      .eq('game_id', gameId)
+
+    const totalQuestions = actualTotal ?? game.total_questions ?? 10
+
     const currentPhase = game.phase
     const currentIdx = game.current_question_index ?? 0
-    const totalQuestions = game.total_questions ?? 10
     const now = new Date().toISOString()
+
+    console.log('advance-phase:', { currentPhase, currentIdx, totalQuestions, actualTotal })
 
     let nextPhase: string
     let nextIdx = currentIdx
-    let finished = false
 
     if (currentPhase === 'question_active') {
       nextPhase = 'result_phase'
     } else if (currentPhase === 'result_phase') {
       nextPhase = 'leaderboard'
     } else if (currentPhase === 'leaderboard') {
-      if (currentIdx + 1 >= totalQuestions) {
-        finished = true
-        nextPhase = 'finished'
+      const nextIndex = currentIdx + 1
+      if (nextIndex >= totalQuestions) {
+        // Game finished
+        await supabase
+          .from('games')
+          .update({
+            status: 'finished',
+            phase: 'finished',
+            finished_at: now,
+          })
+          .eq('id', gameId)
+
+        return new Response(JSON.stringify({ phase: 'finished', question_index: currentIdx }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
       } else {
         nextPhase = 'question_active'
-        nextIdx = currentIdx + 1
+        nextIdx = nextIndex
       }
     } else {
-      // Initial phase or unknown — start with question_active
+      // Initial phase — start with question_active
       nextPhase = 'question_active'
-    }
-
-    if (finished) {
-      await supabase
-        .from('games')
-        .update({
-          status: 'finished',
-          phase: 'finished',
-          finished_at: now,
-        })
-        .eq('id', gameId)
-
-      return new Response(JSON.stringify({ phase: 'finished', question_index: currentIdx }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
     }
 
     await supabase

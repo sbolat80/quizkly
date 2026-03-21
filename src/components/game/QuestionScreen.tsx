@@ -89,7 +89,7 @@ const QuestionScreen = () => {
 
       {/* Question text */}
       <h2 className="text-2xl font-extrabold text-foreground text-center leading-tight mb-8">
-        {question.question_text}
+        {questionText}
       </h2>
 
       {/* Answer buttons */}

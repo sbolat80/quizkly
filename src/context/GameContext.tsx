@@ -123,6 +123,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const handleGameUpdate = useCallback(async (updatedGame: any) => {
+    console.log('Game update:', {
+      status: updatedGame.status,
+      phase: updatedGame.phase,
+      currentQuestionIndex: updatedGame.current_question_index,
+      totalQuestions: updatedGame.total_questions,
+    });
     const s = useGameStore.getState();
     s.setGame(updatedGame);
 
