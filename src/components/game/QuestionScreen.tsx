@@ -114,7 +114,7 @@ const QuestionScreen = () => {
       </h2>
 
       {/* Answer buttons */}
-      <div className="flex flex-col gap-3 flex-1">
+      <div className="flex flex-col gap-3">
         {options.map((option, index) => {
           const isSelected = selectedAnswer === index;
           const isOther = hasAnswered && !isSelected;
@@ -142,15 +142,18 @@ const QuestionScreen = () => {
         })}
       </div>
 
-      {/* Answer locked message */}
+      {/* Answer locked — right below buttons */}
       {hasAnswered && (
-        <motion.p
+        <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center text-sm text-muted-foreground mt-4 pb-4"
+          transition={{ duration: 0.2 }}
+          className="mt-4 flex justify-center"
         >
-          ✅ {t('answerLocked')}
-        </motion.p>
+          <p className="rounded-full bg-muted px-4 py-2 text-center text-sm font-semibold text-muted-foreground">
+            ✅ {t('answerLocked')}
+          </p>
+        </motion.div>
       )}
     </motion.div>
   );
