@@ -126,22 +126,17 @@ const JoinScreen = ({ initialCode }: { initialCode?: string }) => {
                 value={code}
                 onChange={(e) => setCode(e.target.value.toUpperCase().slice(0, 6))}
                 maxLength={6}
-                className="h-12 text-center text-2xl font-black tracking-[0.3em] uppercase rounded-xl bg-card/60 border-border"
+                className={`h-14 text-center text-2xl font-black tracking-[0.3em] uppercase rounded-xl bg-card/60 ${linkError ? 'border-destructive' : 'border-border'}`}
               />
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
                 {statusIcon()}
               </div>
             </div>
-            {hasError && (
-              <motion.div
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="rounded-lg bg-destructive/10 border border-destructive/20 px-3 py-2 text-xs text-destructive font-medium"
-              >
-                {codeStatus === 'not_found' && t('invalidLink')}
-                {codeStatus === 'finished' && t('gameEnded')}
-                {codeStatus === 'started' && t('gameStarted')}
-              </motion.div>
+            {linkError && (
+              <div className="flex items-center gap-2 rounded-xl bg-destructive/10 px-4 py-3 text-sm font-semibold text-destructive">
+                <AlertCircle className="h-5 w-5 shrink-0" />
+                {linkError}
+              </div>
             )}
           </div>
 
