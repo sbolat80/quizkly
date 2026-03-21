@@ -138,14 +138,22 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       totalQ: updatedGame.total_questions,
     });
     const s = useGameStore.getState();
-    s.setGame(updatedGame);
 
     if (updatedGame.status === 'finished' || updatedGame.phase === 'finished') {
-      console.log('Game finished! Going to final.');
+      console.log('>>> GAME FINISHED <<<');
       clearPhaseTimer();
+      try {
+        const finalPlayers = await gameService.getGamePlayers(updatedGame.id);
+        s.setPlayers(finalPlayers);
+      } catch (e) {
+        console.error('getGamePlayers on finish failed:', e);
+      }
+      s.setGame(updatedGame);
       s.setScreen('final');
       return;
     }
+
+    s.setGame(updatedGame);
 
     if (updatedGame.status === 'waiting') {
       clearPhaseTimer();
