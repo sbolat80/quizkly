@@ -4,6 +4,8 @@ import HomeScreen from './HomeScreen';
 import CreateScreen from './CreateScreen';
 import JoinScreen from './JoinScreen';
 import WaitingRoom from './WaitingRoom';
+import CountdownScreen from './CountdownScreen';
+import QuestionScreen from './QuestionScreen';
 
 const PlaceholderScreen = ({ name }: { name: string }) => (
   <div className="min-h-screen flex items-center justify-center bg-background text-foreground font-bold">
