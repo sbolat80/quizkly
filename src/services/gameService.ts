@@ -312,8 +312,7 @@ export async function advancePhase(gameId: string, config?: {
     },
   });
   if (error) throw error;
-  return data as { phase: string; question_index: number };
-}
+  return data as { phase: string; question_index: number; status?: string };
 
 export async function resetGame(gameId: string) {
   await supabase.from('answers').delete().eq('game_id', gameId);
