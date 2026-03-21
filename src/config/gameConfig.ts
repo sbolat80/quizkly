@@ -9,7 +9,7 @@ const gameConfig = {
 
   // Faz süreleri (milisaniye)
   RESULT_PHASE_MS: 3000,
-  LEADERBOARD_PHASE_MS: 4000,
+  LEADERBOARD_PHASE_MS: 3000,
 } as const;
 
 export default gameConfig;
