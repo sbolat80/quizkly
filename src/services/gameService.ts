@@ -12,6 +12,25 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+function buildCategoryDistribution(
+  categories: string[],
+  needed: number
+): Record<string, number> {
+  const shuffled = shuffle(categories);
+  console.log('Random category order:', shuffled);
+  const dist: Record<string, number> = {};
+  for (const cat of shuffled) dist[cat] = 0;
+  let remaining = needed;
+  let catIdx = 0;
+  while (remaining > 0) {
+    dist[shuffled[catIdx % shuffled.length]]++;
+    remaining--;
+    catIdx++;
+  }
+  console.log('Category distribution:', dist, 'Total:', Object.values(dist).reduce((a, b) => a + b, 0));
+  return dist;
+}
+
 export async function createGame(nickname: string, avatarId: number, language: string) {
   const sessionId = getSessionId();
 
@@ -25,16 +44,9 @@ export async function createGame(nickname: string, avatarId: number, language: s
     .single();
   if (gameErr || !game) throw new Error('Could not create game');
 
-  // Create game_settings with dynamic category distribution
-  const questionsPerGame = gameConfig.QUESTIONS_PER_GAME;
   const categories = ['general', 'science', 'math', 'sports', 'music'];
-  const perCategory = Math.floor(questionsPerGame / categories.length);
-  const remainder = questionsPerGame % categories.length;
-  const categoryDist: Record<string, number> = {};
-  categories.forEach((cat, i) => {
-    categoryDist[cat] = perCategory + (i < remainder ? 1 : 0);
-  });
-  console.log('Category distribution:', categoryDist, 'Total:', Object.values(categoryDist).reduce((a, b) => a + b, 0));
+  const questionsPerGame = gameConfig.QUESTIONS_PER_GAME;
+  const categoryDist = buildCategoryDistribution(categories, questionsPerGame);
 
   await supabase
     .from('game_settings')
