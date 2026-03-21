@@ -16,6 +16,20 @@ const OPTION_COLORS = [
 
 const OPTION_LABELS = ['A', 'B', 'C', 'D'];
 
+const getBarColor = (timeLeft: number, duration: number) => {
+  const ratio = timeLeft / duration;
+  if (ratio > 0.5) return 'bg-emerald-500';
+  if (ratio > 0.25) return 'bg-amber-500';
+  return 'bg-red-500';
+};
+
+const getTimeColor = (timeLeft: number, duration: number) => {
+  const ratio = timeLeft / duration;
+  if (ratio > 0.5) return 'text-emerald-500';
+  if (ratio > 0.25) return 'text-amber-500';
+  return 'text-red-500';
+};
+
 const QuestionScreen = () => {
   const { t } = useI18n();
   const { submitAnswer } = useGame();
@@ -58,8 +72,8 @@ const QuestionScreen = () => {
     await submitAnswer(index);
   };
 
-  const timerPercent = (timeLeft / effectiveTimeLimit) * 100;
-  const isUrgent = timeLeft < 5;
+  const displayTime = Math.ceil(timeLeft);
+  const timerPercent = Math.max(0, (timeLeft / effectiveTimeLimit) * 100);
 
   return (
     <motion.div
@@ -75,16 +89,22 @@ const QuestionScreen = () => {
         <span className="text-sm font-bold text-muted-foreground">
           {t('question')} {currentQuestionIndex + 1}/{questions.length}
         </span>
-        <span className={`text-sm font-black tabular-nums ${isUrgent ? 'text-destructive' : 'text-foreground'}`}>
-          {Math.ceil(timeLeft)}s
-        </span>
+        <motion.span
+          key={displayTime}
+          initial={{ scale: 1.2, opacity: 0.7 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.2 }}
+          className={`text-2xl font-black tabular-nums ${getTimeColor(timeLeft, effectiveTimeLimit)} ${timeLeft <= 5 ? 'animate-pulse' : ''}`}
+        >
+          {displayTime}s
+        </motion.span>
       </div>
 
       {/* Timer bar */}
-      <div className="h-3 w-full rounded-full bg-secondary overflow-hidden mb-6">
+      <div className="mb-6 h-3 w-full overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
         <div
-          className={`h-full rounded-full transition-all duration-500 ease-linear ${isUrgent ? 'bg-destructive' : 'bg-primary'}`}
-          style={{ width: `${timerPercent}%` }}
+          className={`h-full rounded-full ${getBarColor(timeLeft, effectiveTimeLimit)}`}
+          style={{ width: `${timerPercent}%`, transition: 'width 1s linear, background-color 0.5s ease' }}
         />
       </div>
 
