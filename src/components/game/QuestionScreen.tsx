@@ -16,6 +16,20 @@ const OPTION_COLORS = [
 
 const OPTION_LABELS = ['A', 'B', 'C', 'D'];
 
+const getBarColor = (timeLeft: number, duration: number) => {
+  const ratio = timeLeft / duration;
+  if (ratio > 0.5) return 'bg-emerald-500';
+  if (ratio > 0.25) return 'bg-amber-500';
+  return 'bg-red-500';
+};
+
+const getTimeColor = (timeLeft: number, duration: number) => {
+  const ratio = timeLeft / duration;
+  if (ratio > 0.5) return 'text-emerald-500';
+  if (ratio > 0.25) return 'text-amber-500';
+  return 'text-red-500';
+};
+
 const QuestionScreen = () => {
   const { t } = useI18n();
   const { submitAnswer } = useGame();
