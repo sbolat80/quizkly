@@ -30,10 +30,12 @@ const JoinScreen = ({ initialCode }: { initialCode?: string }) => {
   useEffect(() => {
     if (code.length < 3) {
       setCodeStatus('idle');
+      setLinkError(null);
       return;
     }
     const timeout = setTimeout(async () => {
       setCodeStatus('checking');
+      setLinkError(null);
       const { data, error } = await supabase
         .from('games')
         .select('status')
@@ -42,14 +44,18 @@ const JoinScreen = ({ initialCode }: { initialCode?: string }) => {
 
       if (error || !data) {
         setCodeStatus('not_found');
+        setLinkError(t('invalidLink'));
         return;
       }
       if (data.status === 'finished') {
         setCodeStatus('finished');
+        setLinkError(t('gameEnded'));
       } else if (data.status === 'in_progress') {
         setCodeStatus('started');
+        setLinkError(t('gameStarted'));
       } else {
         setCodeStatus('valid');
+        setLinkError(null);
       }
     }, 400);
 
