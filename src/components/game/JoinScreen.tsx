@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 type CodeStatus = 'idle' | 'checking' | 'valid' | 'not_found' | 'finished' | 'started';
 
 const JoinScreen = ({ initialCode }: { initialCode?: string }) => {
+
   const { t } = useI18n();
   const setScreen = useGameStore((s) => s.setScreen);
   const loading = useGameStore((s) => s.loading);
