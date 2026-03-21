@@ -26,3 +26,7 @@ export const avatars: AvatarData[] = [
   { id: 7, nameKey: 'avatar7', image: monster7, color: '#8B5CF6' },
   { id: 8, nameKey: 'avatar8', image: monster8, color: '#EC4899' },
 ];
+
+export function getAvatarById(id: number): AvatarData {
+  return avatars.find((a) => a.id === id) ?? avatars[0];
+}
