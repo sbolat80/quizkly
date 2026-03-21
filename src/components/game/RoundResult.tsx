@@ -5,9 +5,13 @@ import { useGameStore } from '@/stores/gameStore';
 import { useI18n } from '@/i18n';
 import { playCorrect, playWrong, playTimeUp } from '@/lib/sounds';
 import { getAvatarById } from '@/data/avatars';
+import { supabase } from '@/integrations/supabase/client';
+import { useGame } from '@/context/GameContext';
 
 const RoundResult = () => {
   const { t } = useI18n();
+  const { navigate } = useGame();
+  const game = useGameStore((s) => s.game);
   const currentPlayer = useGameStore((s) => s.currentPlayer);
   const questions = useGameStore((s) => s.questions);
   const currentQuestionIndex = useGameStore((s) => s.currentQuestionIndex);
@@ -33,6 +37,29 @@ const RoundResult = () => {
     else if (playerAnswered && !isCorrect) playWrong();
     else playTimeUp();
   }, [playerAnswered, isCorrect]);
+
+  // Polling fallback for finished detection
+  useEffect(() => {
+    if (!game?.id) return;
+    const pollInterval = setInterval(async () => {
+      try {
+        const { data } = await supabase
+          .from('games')
+          .select('status, phase')
+          .eq('id', game.id)
+          .single();
+        if (data?.status === 'finished' || data?.phase === 'finished') {
+          console.log('Finished detected by polling (round_result)!');
+          clearInterval(pollInterval);
+          navigate('final');
+        }
+      } catch (e) {
+        console.error('Poll error:', e);
+      }
+    }, 2000);
+    const timeout = setTimeout(() => clearInterval(pollInterval), 30000);
+    return () => { clearInterval(pollInterval); clearTimeout(timeout); };
+  }, [game?.id, navigate]);
 
   const avatarAnimate = playerAnswered
     ? isCorrect

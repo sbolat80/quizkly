@@ -80,17 +80,26 @@ Deno.serve(async (req) => {
     } else if (currentPhase === 'leaderboard') {
       const nextIndex = currentIdx + 1
       if (nextIndex >= totalQuestions) {
-        // Game finished
+        // Game finished — two updates to ensure realtime triggers
         await supabase
           .from('games')
           .update({
             status: 'finished',
-            phase: 'finished',
             finished_at: now,
           })
           .eq('id', gameId)
 
-        console.log('Game finished:', gameId)
+        // Small delay then update phase separately for a second realtime event
+        await new Promise(resolve => setTimeout(resolve, 100))
+
+        await supabase
+          .from('games')
+          .update({
+            phase: 'finished',
+          })
+          .eq('id', gameId)
+
+        console.log('Game finished - two updates sent:', gameId)
         return new Response(JSON.stringify({ phase: 'finished', status: 'finished', question_index: currentIdx }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
