@@ -162,26 +162,15 @@ export async function startGame(gameId: string, language: string) {
   const settings = await getGameSettings(gameId);
   const needed = settings.questions_per_game;
   const rawDist = (settings.category_distribution ?? {}) as Record<string, number>;
-  
-  // Adjust distribution if total exceeds needed
+
+  // Validate distribution total matches needed
   const distTotal = Object.values(rawDist).reduce((a: number, b: number) => a + b, 0);
-  const categoryDist: Record<string, number> = {};
-  if (distTotal > needed) {
-    let remaining = needed;
-    const cats = Object.entries(rawDist);
-    cats.forEach(([cat, count], i) => {
-      if (i === cats.length - 1) {
-        categoryDist[cat] = remaining;
-      } else {
-        const adjusted = Math.floor((count / distTotal) * needed);
-        categoryDist[cat] = adjusted;
-        remaining -= adjusted;
-      }
-    });
-  } else {
-    Object.assign(categoryDist, rawDist);
+  let finalDist = rawDist;
+  if (distTotal !== needed) {
+    console.log(`Distribution mismatch! dist total: ${distTotal}, needed: ${needed}. Recalculating...`);
+    finalDist = buildCategoryDistribution(Object.keys(rawDist), needed);
   }
-  console.log('Game settings:', settings, 'Adjusted distribution:', categoryDist, 'Needed:', needed);
+  console.log('Final distribution:', finalDist, 'Needed:', needed);
 
   // Check if questions already inserted
   const { count: existing } = await supabase
@@ -201,7 +190,7 @@ export async function startGame(gameId: string, language: string) {
       throw new Error(`Not enough questions. Found: ${allQuestions.length}, needed: ${needed}`);
     }
 
-    // Group by category
+    // Group by category and shuffle each pool
     const categoryGroups: Record<string, typeof allQuestions> = {};
     for (const q of allQuestions) {
       if (!categoryGroups[q.category]) categoryGroups[q.category] = [];
@@ -211,11 +200,12 @@ export async function startGame(gameId: string, language: string) {
       categoryGroups[cat] = shuffle(categoryGroups[cat]);
     }
 
-    // Select by category_distribution
+    // Select by finalDist
     const selected: typeof allQuestions = [];
     const selectedIds = new Set<string>();
 
-    for (const [cat, count] of Object.entries(categoryDist)) {
+    for (const [cat, count] of Object.entries(finalDist)) {
+      if (count === 0) continue;
       const pool = categoryGroups[cat] || [];
       let picked = 0;
       for (const q of pool) {
@@ -226,10 +216,14 @@ export async function startGame(gameId: string, language: string) {
           picked++;
         }
       }
+      if (picked < count) {
+        console.warn(`Category ${cat}: needed ${count}, got ${picked}`);
+      }
     }
 
     // Fill remaining from any category
     if (selected.length < needed) {
+      console.log(`Need ${needed - selected.length} more questions`);
       const remaining = shuffle(allQuestions.filter(q => !selectedIds.has(q.id)));
       for (const q of remaining) {
         if (selected.length >= needed) break;
@@ -238,7 +232,10 @@ export async function startGame(gameId: string, language: string) {
       }
     }
 
-    console.log(`Selected ${selected.length} questions:`, selected.map(q => q.category));
+    console.log(`Final selection: ${selected.length} questions`, selected.reduce((acc, q) => {
+      acc[q.category] = (acc[q.category] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>));
 
     const shuffled = shuffle(selected);
     const { error: insertErr } = await supabase
@@ -257,7 +254,10 @@ export async function startGame(gameId: string, language: string) {
     .select('*', { count: 'exact', head: true })
     .eq('game_id', gameId);
 
-  console.log('Total questions in DB:', realCount);
+  console.log('Questions in DB:', realCount);
+  if (realCount !== needed) {
+    console.error(`Expected ${needed} questions but got ${realCount}!`);
+  }
 
   const { error: updateErr } = await supabase
     .from('games')
