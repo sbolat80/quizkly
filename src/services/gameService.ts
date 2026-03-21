@@ -103,23 +103,21 @@ export async function startGame(gameId: string, language: string) {
     .single();
   if (game?.status !== 'waiting') throw new Error('Game is not in waiting state');
 
-  const categoryDistribution: Record<string, number> = {
-    general: 2,
-    geography: 2,
-    science: 2,
-    math: 2,
-    sports: 1,
-    culture: 1,
-  };
+  const categories = ['general', 'geography', 'science', 'math', 'sports', 'culture'];
+  const perCategory = Math.floor(gameConfig.QUESTIONS_PER_GAME / categories.length);
+  const remainder = gameConfig.QUESTIONS_PER_GAME % categories.length;
 
   const selectedQuestions: any[] = [];
 
-  for (const [category, count] of Object.entries(categoryDistribution)) {
+  for (let i = 0; i < categories.length; i++) {
+    const count = perCategory + (i < remainder ? 1 : 0);
+    if (count === 0) continue;
+
     const { data } = await supabase
       .from('questions')
       .select()
       .eq('language', language)
-      .eq('category', category)
+      .eq('category', categories[i])
       .eq('is_active', true);
 
     const shuffled = shuffle(data ?? []);
