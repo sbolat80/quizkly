@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { getSessionId } from '@/lib/session';
+import gameConfig from '@/config/gameConfig';
 
 // Fisher-Yates shuffle
 function shuffle<T>(arr: T[]): T[] {
@@ -102,23 +103,21 @@ export async function startGame(gameId: string, language: string) {
     .single();
   if (game?.status !== 'waiting') throw new Error('Game is not in waiting state');
 
-  const categoryDistribution: Record<string, number> = {
-    general: 2,
-    geography: 2,
-    science: 2,
-    math: 2,
-    sports: 1,
-    culture: 1,
-  };
+  const categories = ['general', 'geography', 'science', 'math', 'sports', 'culture'];
+  const perCategory = Math.floor(gameConfig.QUESTIONS_PER_GAME / categories.length);
+  const remainder = gameConfig.QUESTIONS_PER_GAME % categories.length;
 
   const selectedQuestions: any[] = [];
 
-  for (const [category, count] of Object.entries(categoryDistribution)) {
+  for (let i = 0; i < categories.length; i++) {
+    const count = perCategory + (i < remainder ? 1 : 0);
+    if (count === 0) continue;
+
     const { data } = await supabase
       .from('questions')
       .select()
       .eq('language', language)
-      .eq('category', category)
+      .eq('category', categories[i])
       .eq('is_active', true);
 
     const shuffled = shuffle(data ?? []);
@@ -179,9 +178,18 @@ export async function submitAnswer(
   return data as { is_correct: boolean; points_awarded: number; correct_index: number };
 }
 
-export async function advancePhase(gameId: string) {
+export async function advancePhase(gameId: string, config?: {
+  question_time_ms?: number;
+  result_phase_ms?: number;
+  leaderboard_ms?: number;
+}) {
   const { data, error } = await supabase.functions.invoke('advance-phase', {
-    body: { gameId },
+    body: {
+      gameId,
+      question_time_ms: config?.question_time_ms ?? gameConfig.QUESTION_TIME_SECONDS * 1000,
+      result_phase_ms: config?.result_phase_ms ?? gameConfig.RESULT_PHASE_MS,
+      leaderboard_ms: config?.leaderboard_ms ?? gameConfig.LEADERBOARD_PHASE_MS,
+    },
   });
   if (error) throw error;
   return data as { phase: string; question_index: number };

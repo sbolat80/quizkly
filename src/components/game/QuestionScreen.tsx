@@ -5,6 +5,7 @@ import { useGame } from '@/context/GameContext';
 import { useI18n } from '@/i18n';
 import { useServerTimer } from '@/hooks/use-server-timer';
 import { playTap } from '@/lib/sounds';
+import gameConfig from '@/config/gameConfig';
 
 const OPTION_COLORS = [
   'bg-red-500 hover:bg-red-500/90',
@@ -23,7 +24,7 @@ const QuestionScreen = () => {
   const currentQuestionIndex = useGameStore((s) => s.currentQuestionIndex);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
 
-  const timeLeft = useServerTimer(game?.phase_started_at ?? null, 15);
+  const timeLeft = useServerTimer(game?.phase_started_at ?? null, gameConfig.QUESTION_TIME_SECONDS);
 
   const questionData = questions[currentQuestionIndex];
   const question = questionData?.questions ?? questionData;
@@ -55,7 +56,7 @@ const QuestionScreen = () => {
     await submitAnswer(index);
   };
 
-  const timerPercent = (timeLeft / 15) * 100;
+  const timerPercent = (timeLeft / gameConfig.QUESTION_TIME_SECONDS) * 100;
   const isUrgent = timeLeft < 5;
 
   return (
