@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 type CodeStatus = 'idle' | 'checking' | 'valid' | 'not_found' | 'finished' | 'started';
 
 const JoinScreen = ({ initialCode }: { initialCode?: string }) => {
+
   const { t } = useI18n();
   const setScreen = useGameStore((s) => s.setScreen);
   const loading = useGameStore((s) => s.loading);
@@ -24,14 +25,17 @@ const JoinScreen = ({ initialCode }: { initialCode?: string }) => {
   const [nickname, setNickname] = useState('');
   const [avatarId, setAvatarId] = useState(1);
   const [codeStatus, setCodeStatus] = useState<CodeStatus>(initialCode ? 'checking' : 'idle');
+  const [linkError, setLinkError] = useState<string | null>(null);
 
   useEffect(() => {
     if (code.length < 3) {
       setCodeStatus('idle');
+      setLinkError(null);
       return;
     }
     const timeout = setTimeout(async () => {
       setCodeStatus('checking');
+      setLinkError(null);
       const { data, error } = await supabase
         .from('games')
         .select('status')
@@ -40,21 +44,24 @@ const JoinScreen = ({ initialCode }: { initialCode?: string }) => {
 
       if (error || !data) {
         setCodeStatus('not_found');
+        setLinkError(t('invalidLink'));
         return;
       }
       if (data.status === 'finished') {
         setCodeStatus('finished');
+        setLinkError(t('gameEnded'));
       } else if (data.status === 'in_progress') {
         setCodeStatus('started');
+        setLinkError(t('gameStarted'));
       } else {
         setCodeStatus('valid');
+        setLinkError(null);
       }
     }, 400);
 
     return () => clearTimeout(timeout);
   }, [code]);
 
-  const hasError = codeStatus === 'not_found' || codeStatus === 'finished' || codeStatus === 'started';
   const canJoin = code.length >= 3 && nickname.trim() && codeStatus === 'valid' && !loading;
 
   const handleJoin = async () => {
@@ -68,9 +75,6 @@ const JoinScreen = ({ initialCode }: { initialCode?: string }) => {
     switch (codeStatus) {
       case 'checking': return <span className="text-xs text-muted-foreground animate-pulse">{t('checkingRoom')}</span>;
       case 'valid': return <CheckCircle2 className="w-4 h-4 text-green-500" />;
-      case 'not_found': return <span className="flex items-center gap-1 text-xs text-destructive"><XCircle className="w-4 h-4" />{t('invalidLink')}</span>;
-      case 'finished': return <span className="flex items-center gap-1 text-xs text-destructive"><AlertCircle className="w-4 h-4" />{t('gameEnded')}</span>;
-      case 'started': return <span className="flex items-center gap-1 text-xs text-accent"><AlertCircle className="w-4 h-4" />{t('gameStarted')}</span>;
       default: return null;
     }
   };
@@ -122,22 +126,17 @@ const JoinScreen = ({ initialCode }: { initialCode?: string }) => {
                 value={code}
                 onChange={(e) => setCode(e.target.value.toUpperCase().slice(0, 6))}
                 maxLength={6}
-                className="h-12 text-center text-2xl font-black tracking-[0.3em] uppercase rounded-xl bg-card/60 border-border"
+                className={`h-14 text-center text-2xl font-black tracking-[0.3em] uppercase rounded-xl bg-card/60 ${linkError ? 'border-destructive' : 'border-border'}`}
               />
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
                 {statusIcon()}
               </div>
             </div>
-            {hasError && (
-              <motion.div
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="rounded-lg bg-destructive/10 border border-destructive/20 px-3 py-2 text-xs text-destructive font-medium"
-              >
-                {codeStatus === 'not_found' && t('invalidLink')}
-                {codeStatus === 'finished' && t('gameEnded')}
-                {codeStatus === 'started' && t('gameStarted')}
-              </motion.div>
+            {linkError && (
+              <div className="flex items-center gap-2 rounded-xl bg-destructive/10 px-4 py-3 text-sm font-semibold text-destructive">
+                <AlertCircle className="h-5 w-5 shrink-0" />
+                {linkError}
+              </div>
             )}
           </div>
 
