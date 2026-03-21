@@ -141,8 +141,6 @@ export async function startGame(gameId: string, language: string) {
     .from('games')
     .update({
       status: 'in_progress',
-      phase: 'question_active',
-      phase_started_at: new Date().toISOString(),
       current_question_index: 0,
       total_questions: finalQuestions.length,
       started_at: new Date().toISOString(),
