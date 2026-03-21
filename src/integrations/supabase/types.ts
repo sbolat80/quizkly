@@ -114,6 +114,41 @@ export type Database = {
           },
         ]
       }
+      game_settings: {
+        Row: {
+          category_distribution: Json | null
+          created_at: string | null
+          game_id: string | null
+          id: string
+          question_time_seconds: number | null
+          questions_per_game: number | null
+        }
+        Insert: {
+          category_distribution?: Json | null
+          created_at?: string | null
+          game_id?: string | null
+          id?: string
+          question_time_seconds?: number | null
+          questions_per_game?: number | null
+        }
+        Update: {
+          category_distribution?: Json | null
+          created_at?: string | null
+          game_id?: string | null
+          id?: string
+          question_time_seconds?: number | null
+          questions_per_game?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_settings_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       games: {
         Row: {
           created_at: string | null

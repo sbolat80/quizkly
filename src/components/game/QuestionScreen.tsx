@@ -24,9 +24,10 @@ const QuestionScreen = () => {
   const currentQuestionIndex = useGameStore((s) => s.currentQuestionIndex);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
 
-  const timeLeft = useServerTimer(game?.phase_started_at ?? null, gameConfig.QUESTION_TIME_SECONDS);
-
   const questionData = questions[currentQuestionIndex];
+  const effectiveTimeLimit = questionData?.timeLimit ?? gameConfig.QUESTION_TIME_SECONDS;
+  const timeLeft = useServerTimer(game?.phase_started_at ?? null, effectiveTimeLimit);
+
   const question = questionData?.questions ?? questionData;
   const questionText = question?.text || question?.question_text || 'Loading...';
 
@@ -57,7 +58,7 @@ const QuestionScreen = () => {
     await submitAnswer(index);
   };
 
-  const timerPercent = (timeLeft / gameConfig.QUESTION_TIME_SECONDS) * 100;
+  const timerPercent = (timeLeft / effectiveTimeLimit) * 100;
   const isUrgent = timeLeft < 5;
 
   return (
