@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { getSessionId } from '@/lib/session';
+import gameConfig from '@/config/gameConfig';
 
 // Fisher-Yates shuffle
 function shuffle<T>(arr: T[]): T[] {
