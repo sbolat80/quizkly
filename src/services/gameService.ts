@@ -25,20 +25,24 @@ export async function createGame(nickname: string, avatarId: number, language: s
     .single();
   if (gameErr || !game) throw new Error('Could not create game');
 
-  // Create game_settings with defaults
+  // Create game_settings with dynamic category distribution
+  const questionsPerGame = gameConfig.QUESTIONS_PER_GAME;
+  const categories = ['general', 'science', 'math', 'sports', 'music'];
+  const perCategory = Math.floor(questionsPerGame / categories.length);
+  const remainder = questionsPerGame % categories.length;
+  const categoryDist: Record<string, number> = {};
+  categories.forEach((cat, i) => {
+    categoryDist[cat] = perCategory + (i < remainder ? 1 : 0);
+  });
+  console.log('Category distribution:', categoryDist, 'Total:', Object.values(categoryDist).reduce((a, b) => a + b, 0));
+
   await supabase
     .from('game_settings')
     .insert({
       game_id: game.id,
-      questions_per_game: gameConfig.QUESTIONS_PER_GAME,
+      questions_per_game: questionsPerGame,
       question_time_seconds: gameConfig.QUESTION_TIME_SECONDS,
-      category_distribution: {
-        general: 2,
-        science: 2,
-        math: 2,
-        sports: 2,
-        music: 2,
-      },
+      category_distribution: categoryDist,
     });
 
   const { data: player, error: playerErr } = await supabase
