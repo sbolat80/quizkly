@@ -5,6 +5,7 @@ import { useGame } from '@/context/GameContext';
 import { useI18n } from '@/i18n';
 import { useServerTimer } from '@/hooks/use-server-timer';
 import { playTap } from '@/lib/sounds';
+import gameConfig from '@/config/gameConfig';
 
 const OPTION_COLORS = [
   'bg-red-500 hover:bg-red-500/90',
