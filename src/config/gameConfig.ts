@@ -3,10 +3,10 @@
 // Test için buradaki değerleri değiştirebilirsin
 // ama production'da DB değerleri önceliklidir.
 const gameConfig = {
-  QUESTION_TIME_SECONDS: 5,  // fallback (test: 5, prod: 15)
-  QUESTIONS_PER_GAME: 3,     // fallback (test: 3, prod: 10)
-  RESULT_PHASE_MS: 3000,
-  LEADERBOARD_PHASE_MS: 4000,
+  QUESTION_TIME_SECONDS: 7, // fallback (test: 7, prod: 10)
+  QUESTIONS_PER_GAME: 5, // fallback (test: 5, prod: 10)
+  RESULT_PHASE_MS: 2500,
+  LEADERBOARD_PHASE_MS: 2500,
 } as const;
 
 export default gameConfig;
