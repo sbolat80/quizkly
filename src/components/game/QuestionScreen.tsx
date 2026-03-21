@@ -24,7 +24,7 @@ const QuestionScreen = () => {
   const currentQuestionIndex = useGameStore((s) => s.currentQuestionIndex);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
 
-  const timeLeft = useServerTimer(game?.phase_started_at ?? null, 15);
+  const timeLeft = useServerTimer(game?.phase_started_at ?? null, gameConfig.QUESTION_TIME_SECONDS);
 
   const questionData = questions[currentQuestionIndex];
   const question = questionData?.questions ?? questionData;
