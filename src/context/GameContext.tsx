@@ -66,11 +66,18 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
     phaseTimerRef.current = setTimeout(async () => {
       try {
-        await gameService.advancePhase(updatedGame.id, {
+        console.log('Calling advancePhase...');
+        const result = await gameService.advancePhase(updatedGame.id, {
           question_time_ms: gameConfig.QUESTION_TIME_SECONDS * 1000,
           result_phase_ms: gameConfig.RESULT_PHASE_MS,
           leaderboard_ms: gameConfig.LEADERBOARD_PHASE_MS,
         });
+        console.log('advancePhase result:', result);
+        if (result?.phase === 'finished') {
+          console.log('Phase finished from advancePhase!');
+          clearPhaseTimer();
+          useGameStore.getState().setScreen('final');
+        }
       } catch (e) {
         console.error('advancePhase failed:', e);
       }
