@@ -149,8 +149,27 @@ export async function startGame(gameId: string, language: string) {
   // Read settings from DB
   const settings = await getGameSettings(gameId);
   const needed = settings.questions_per_game;
-  const categoryDist = (settings.category_distribution ?? {}) as Record<string, number>;
-  console.log('Game settings:', settings);
+  const rawDist = (settings.category_distribution ?? {}) as Record<string, number>;
+  
+  // Adjust distribution if total exceeds needed
+  const distTotal = Object.values(rawDist).reduce((a: number, b: number) => a + b, 0);
+  const categoryDist: Record<string, number> = {};
+  if (distTotal > needed) {
+    let remaining = needed;
+    const cats = Object.entries(rawDist);
+    cats.forEach(([cat, count], i) => {
+      if (i === cats.length - 1) {
+        categoryDist[cat] = remaining;
+      } else {
+        const adjusted = Math.floor((count / distTotal) * needed);
+        categoryDist[cat] = adjusted;
+        remaining -= adjusted;
+      }
+    });
+  } else {
+    Object.assign(categoryDist, rawDist);
+  }
+  console.log('Game settings:', settings, 'Adjusted distribution:', categoryDist, 'Needed:', needed);
 
   // Check if questions already inserted
   const { count: existing } = await supabase

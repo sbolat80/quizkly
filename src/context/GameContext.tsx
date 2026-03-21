@@ -189,7 +189,15 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const setupSubscriptions = useCallback((gameId: string) => {
     cleanupSubscriptions();
 
-    gameSubRef.current = gameService.subscribeToGame(gameId, handleGameUpdate);
+    gameSubRef.current = gameService.subscribeToGame(gameId, async (updatedGame: any) => {
+      if (updatedGame.status === 'finished' || updatedGame.phase === 'finished') {
+        clearPhaseTimer();
+        useGameStore.getState().setGame(updatedGame);
+        useGameStore.getState().setScreen('final');
+        return;
+      }
+      await handleGameUpdate(updatedGame);
+    });
 
     playerSubRef.current = gameService.subscribeToPlayers(gameId, (updatedPlayers) => {
       const s = useGameStore.getState();
