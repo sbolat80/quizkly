@@ -12,6 +12,7 @@ import { getAvatarById } from '@/data/avatars';
 const medals = ['🥇', '🥈', '🥉'];
 
 const FinalLeaderboard = () => {
+  useLockBodyScroll();
   const { t } = useI18n();
   const { goHome, playAgain } = useGame();
   const players = useGameStore((s) => s.players);

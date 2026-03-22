@@ -6,6 +6,7 @@ import { useLockBodyScroll } from '@/hooks/use-lock-body-scroll';
 import { playCountdownTick, playCountdownGo } from '@/lib/sounds';
 
 const CountdownScreen = () => {
+  useLockBodyScroll();
   const { t } = useI18n();
   const { navigate } = useGame();
   const [count, setCount] = useState(3);

@@ -11,6 +11,7 @@ import { useGame } from '@/context/GameContext';
 const medals = ['🥇', '🥈', '🥉'];
 
 const InterimLeaderboard = () => {
+  useLockBodyScroll();
   const { t } = useI18n();
   const { navigate } = useGame();
   const game = useGameStore((s) => s.game);

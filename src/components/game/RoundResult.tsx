@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useGame } from '@/context/GameContext';
 
 const RoundResult = () => {
+  useLockBodyScroll();
   const { t } = useI18n();
   const { navigate } = useGame();
   const game = useGameStore((s) => s.game);

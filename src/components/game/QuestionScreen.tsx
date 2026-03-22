@@ -153,7 +153,7 @@ const QuestionScreen = () => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          className="mt-4 flex justify-center"
+          className="flex-shrink-0 mt-2 flex justify-center pb-2"
         >
           <p className="rounded-full bg-muted px-4 py-2 text-center text-sm font-semibold text-muted-foreground">
             ✅ {t('answerLocked')}
