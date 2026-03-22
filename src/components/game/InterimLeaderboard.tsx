@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useGameStore } from '@/stores/gameStore';
 import { useI18n } from '@/i18n';
+import { useLockBodyScroll } from '@/hooks/use-lock-body-scroll';
 import { playLeaderboard } from '@/lib/sounds';
 import { getAvatarById } from '@/data/avatars';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,6 +11,7 @@ import { useGame } from '@/context/GameContext';
 const medals = ['🥇', '🥈', '🥉'];
 
 const InterimLeaderboard = () => {
+  useLockBodyScroll();
   const { t } = useI18n();
   const { navigate } = useGame();
   const game = useGameStore((s) => s.game);

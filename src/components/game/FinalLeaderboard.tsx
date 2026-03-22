@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useGameStore } from '@/stores/gameStore';
 import { useGame } from '@/context/GameContext';
 import { useI18n } from '@/i18n';
+import { useLockBodyScroll } from '@/hooks/use-lock-body-scroll';
 import { Button } from '@/components/ui/button';
 import { Trophy, RotateCcw, Home } from 'lucide-react';
 import { playGameOver } from '@/lib/sounds';
@@ -11,6 +12,7 @@ import { getAvatarById } from '@/data/avatars';
 const medals = ['🥇', '🥈', '🥉'];
 
 const FinalLeaderboard = () => {
+  useLockBodyScroll();
   const { t } = useI18n();
   const { goHome, playAgain } = useGame();
   const players = useGameStore((s) => s.players);

@@ -4,6 +4,7 @@ import { useGameStore } from '@/stores/gameStore';
 import { useGame } from '@/context/GameContext';
 import { useI18n } from '@/i18n';
 import { useServerTimer } from '@/hooks/use-server-timer';
+import { useLockBodyScroll } from '@/hooks/use-lock-body-scroll';
 import { playTap } from '@/lib/sounds';
 import gameConfig from '@/config/gameConfig';
 
@@ -31,6 +32,7 @@ const getTimeColor = (timeLeft: number, duration: number) => {
 };
 
 const QuestionScreen = () => {
+  useLockBodyScroll();
   const { t } = useI18n();
   const { submitAnswer } = useGame();
   const game = useGameStore((s) => s.game);
@@ -82,10 +84,11 @@ const QuestionScreen = () => {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -60 }}
       transition={{ duration: 0.3 }}
-      className="min-h-screen flex flex-col bg-background px-4 py-4 safe-x"
+      style={{ height: '100vh', maxHeight: '100vh', overflow: 'hidden' }}
+      className="flex flex-col bg-background px-4 py-4 safe-x"
     >
       {/* Top bar */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex-shrink-0 flex items-center justify-between mb-2">
         <span className="text-sm font-bold text-muted-foreground">
           {t('question')} {currentQuestionIndex + 1}/{questions.length}
         </span>
@@ -101,7 +104,7 @@ const QuestionScreen = () => {
       </div>
 
       {/* Timer bar */}
-      <div className="mb-6 h-3 w-full overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
+      <div className="flex-shrink-0 mb-4 h-3 w-full overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
         <div
           className={`h-full rounded-full ${getBarColor(timeLeft, effectiveTimeLimit)}`}
           style={{ width: `${timerPercent}%`, transition: 'width 1s linear, background-color 0.5s ease' }}
@@ -109,12 +112,14 @@ const QuestionScreen = () => {
       </div>
 
       {/* Question text */}
-      <h2 className="text-2xl font-extrabold text-foreground text-center leading-tight mb-8">
-        {questionText}
-      </h2>
+      <div className="flex-shrink-0 mb-4 text-center">
+        <h2 className="text-lg sm:text-xl font-extrabold text-foreground leading-tight">
+          {questionText}
+        </h2>
+      </div>
 
       {/* Answer buttons */}
-      <div className="flex flex-col gap-3">
+      <div className="flex-1 flex flex-col gap-2 justify-center min-h-0">
         {options.map((option, index) => {
           const isSelected = selectedAnswer === index;
           const isOther = hasAnswered && !isSelected;
@@ -125,7 +130,7 @@ const QuestionScreen = () => {
               whileTap={!hasAnswered ? { scale: 0.97 } : undefined}
               onClick={() => handleAnswer(index)}
               disabled={hasAnswered}
-              className={`h-14 rounded-2xl px-4 flex items-center gap-3 text-white font-bold transition-all ${
+              className={`flex-shrink-0 h-14 sm:h-16 rounded-2xl px-4 flex items-center gap-3 text-white font-bold transition-all ${
                 isSelected
                   ? 'bg-muted text-muted-foreground ring-2 ring-muted-foreground/30'
                   : isOther
@@ -148,7 +153,7 @@ const QuestionScreen = () => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          className="mt-4 flex justify-center"
+          className="flex-shrink-0 mt-2 flex justify-center pb-2"
         >
           <p className="rounded-full bg-muted px-4 py-2 text-center text-sm font-semibold text-muted-foreground">
             ✅ {t('answerLocked')}
