@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { CheckCircle, XCircle, Clock } from 'lucide-react';
 import { useGameStore } from '@/stores/gameStore';
 import { useI18n } from '@/i18n';
+import { useLockBodyScroll } from '@/hooks/use-lock-body-scroll';
 import { playCorrect, playWrong, playTimeUp } from '@/lib/sounds';
 import { getAvatarById } from '@/data/avatars';
 import { supabase } from '@/integrations/supabase/client';
