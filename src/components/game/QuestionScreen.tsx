@@ -104,7 +104,7 @@ const QuestionScreen = () => {
       </div>
 
       {/* Timer bar */}
-      <div className="mb-6 h-3 w-full overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
+      <div className="flex-shrink-0 mb-4 h-3 w-full overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
         <div
           className={`h-full rounded-full ${getBarColor(timeLeft, effectiveTimeLimit)}`}
           style={{ width: `${timerPercent}%`, transition: 'width 1s linear, background-color 0.5s ease' }}
@@ -112,9 +112,11 @@ const QuestionScreen = () => {
       </div>
 
       {/* Question text */}
-      <h2 className="text-2xl font-extrabold text-foreground text-center leading-tight mb-8">
-        {questionText}
-      </h2>
+      <div className="flex-shrink-0 mb-4 text-center">
+        <h2 className="text-lg sm:text-xl font-extrabold text-foreground leading-tight">
+          {questionText}
+        </h2>
+      </div>
 
       {/* Answer buttons */}
       <div className="flex flex-col gap-3">
