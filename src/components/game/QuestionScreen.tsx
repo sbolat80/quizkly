@@ -84,7 +84,8 @@ const QuestionScreen = () => {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -60 }}
       transition={{ duration: 0.3 }}
-      className="min-h-screen flex flex-col bg-background px-4 py-4 safe-x"
+      style={{ height: '100vh', maxHeight: '100vh', overflow: 'hidden' }}
+      className="flex flex-col bg-background px-4 py-4 safe-x"
     >
       {/* Top bar */}
       <div className="flex items-center justify-between mb-3">
