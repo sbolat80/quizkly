@@ -88,7 +88,7 @@ const QuestionScreen = () => {
       className="flex flex-col bg-background px-4 py-4 safe-x"
     >
       {/* Top bar */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex-shrink-0 flex items-center justify-between mb-2">
         <span className="text-sm font-bold text-muted-foreground">
           {t('question')} {currentQuestionIndex + 1}/{questions.length}
         </span>
