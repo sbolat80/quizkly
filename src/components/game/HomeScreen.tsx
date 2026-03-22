@@ -21,7 +21,7 @@ const HomeScreen = () => {
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       className="min-h-screen flex flex-col items-center justify-center bg-background relative overflow-hidden px-6 pl-[max(1.5rem,env(safe-area-inset-left))] pr-[max(1.5rem,env(safe-area-inset-right))]"
     >
-      {/* Top-right controls */}
+      {/* Top-right controls — absolute, out of flow */}
       <div className="absolute top-4 right-4">
         <div className="flex items-center rounded-full px-3 py-1.5 backdrop-blur-sm border transition-all duration-200 hover:brightness-110 bg-black/[0.06] border-black/[0.12] dark:bg-white/10 dark:border-white/20">
           <button
@@ -46,61 +46,64 @@ const HomeScreen = () => {
         </div>
       </div>
 
-      {/* Logo */}
-      <motion.div
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1, y: [0, -6, 0] }}
-        transition={{
-          scale: { type: 'spring', stiffness: 200, damping: 15 },
-          opacity: { type: 'spring', stiffness: 200, damping: 15 },
-          y: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
-        }}
-        className="flex flex-col items-center"
-      >
-        <img
-          src={QuizklyLogo}
-          alt="Quizkly"
-          className="h-28 sm:h-36 w-auto object-contain"
-        />
-      </motion.div>
-
-      {/* Tagline */}
-      <motion.p
-        initial={{ y: 16, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.25, duration: 0.5 }}
-        className="mt-4 text-base font-bold text-center whitespace-pre-line leading-relaxed text-[#3B0764] dark:text-white/60"
-      >
-        {t('tagline')}
-      </motion.p>
-
-      {/* Buttons */}
-      <motion.div
-        initial={{ y: 24, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.45, duration: 0.5 }}
-        className="mt-8 flex flex-col gap-3 w-full max-w-[280px]"
-      >
-        <Button
-          size="lg"
-          className="text-lg font-extrabold h-14 rounded-full gap-2"
-          onClick={() => setScreen('create')}
+      {/* Centered content group */}
+      <div className="flex flex-col items-center gap-6 w-full max-w-[280px]">
+        {/* Logo */}
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1, y: [0, -6, 0] }}
+          transition={{
+            scale: { type: 'spring', stiffness: 200, damping: 15 },
+            opacity: { type: 'spring', stiffness: 200, damping: 15 },
+            y: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
+          }}
+          className="flex flex-col items-center"
         >
-          <Zap className="w-5 h-5" />
-          {t('createGame')}
-        </Button>
-        <Button
-          size="lg"
-          variant="outline"
-          className="text-lg font-extrabold h-14 rounded-full gap-2 border-primary text-primary hover:bg-primary/10"
-          onClick={() => setScreen('join')}
-        >
-          <Users className="w-5 h-5" />
-          {t('joinGame')}
-        </Button>
-      </motion.div>
+          <img
+            src={QuizklyLogo}
+            alt="Quizkly"
+            className="h-32 w-auto object-contain"
+          />
+        </motion.div>
 
-      {/* Footer */}
+        {/* Tagline */}
+        <motion.p
+          initial={{ y: 16, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.25, duration: 0.5 }}
+          className="text-base font-bold text-center whitespace-pre-line leading-relaxed text-[#3B0764] dark:text-white/60"
+        >
+          {t('tagline')}
+        </motion.p>
+
+        {/* Buttons */}
+        <motion.div
+          initial={{ y: 24, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.45, duration: 0.5 }}
+          className="flex flex-col gap-3 w-full"
+        >
+          <Button
+            size="lg"
+            className="text-lg font-extrabold h-14 rounded-full gap-2"
+            onClick={() => setScreen('create')}
+          >
+            <Zap className="w-5 h-5" />
+            {t('createGame')}
+          </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            className="text-lg font-extrabold h-14 rounded-full gap-2 border-primary text-primary hover:bg-primary/10"
+            onClick={() => setScreen('join')}
+          >
+            <Users className="w-5 h-5" />
+            {t('joinGame')}
+          </Button>
+        </motion.div>
+      </div>
+
+      {/* Footer — absolute, out of flow */}
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
