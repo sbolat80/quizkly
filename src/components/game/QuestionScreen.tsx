@@ -77,6 +77,12 @@ const QuestionScreen = () => {
   const displayTime = Math.floor(timeLeft) === 0 ? 1 : Math.floor(timeLeft);
   const timerPercent = Math.max(0, (timeLeft / effectiveTimeLimit) * 100);
 
+  const getButtonClass = (index: number) => {
+    if (!hasAnswered) return OPTION_COLORS[index];
+    if (selectedAnswer === index) return 'bg-white/20 ring-2 ring-white/60 text-foreground';
+    return OPTION_COLORS[index] + ' opacity-40';
+  };
+
   return (
     <motion.div
       key="question"
@@ -85,7 +91,7 @@ const QuestionScreen = () => {
       exit={{ opacity: 0, x: -60 }}
       transition={{ duration: 0.3 }}
       style={{ height: '100vh', maxHeight: '100vh', overflow: 'hidden' }}
-      className="flex flex-col bg-background px-4 py-4 safe-x"
+      className="flex flex-col bg-background px-4 pt-4 pb-6 safe-x"
     >
       {/* Top bar */}
       <div className="flex-shrink-0 flex items-center justify-between mb-2">
@@ -112,57 +118,42 @@ const QuestionScreen = () => {
       </div>
 
       {/* Question text */}
-      <div className="flex-shrink-0 mb-4 text-center">
+      <div className="flex-shrink-0 mb-6 text-center">
         <h2 className="text-lg sm:text-xl font-extrabold text-foreground leading-tight">
           {questionText}
         </h2>
       </div>
 
-      {/* Answer buttons */}
+      {/* Answer buttons + locked message */}
       <div className="flex-shrink-0 flex flex-col gap-3">
-        {options.map((option, index) => {
-          const isSelected = selectedAnswer === index;
-          const isOther = hasAnswered && !isSelected;
+        {options.map((option, index) => (
+          <motion.button
+            key={index}
+            whileTap={!hasAnswered ? { scale: 0.97 } : undefined}
+            onClick={() => handleAnswer(index)}
+            disabled={hasAnswered}
+            className={`flex-shrink-0 h-14 sm:h-16 rounded-2xl px-4 flex items-center gap-3 font-bold shadow-md transition-all ${getButtonClass(index)} ${hasAnswered ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+          >
+            <span className={`h-8 w-8 rounded-lg flex items-center justify-center text-sm font-black shrink-0 ${selectedAnswer === index && hasAnswered ? 'bg-primary text-white' : 'bg-white/20 text-white'}`}>
+              {OPTION_LABELS[index]}
+            </span>
+            <span className="text-left text-sm leading-tight">{option}</span>
+          </motion.button>
+        ))}
 
-          return (
-            <motion.button
-              key={index}
-              whileTap={!hasAnswered ? { scale: 0.97 } : undefined}
-              onClick={() => handleAnswer(index)}
-              disabled={hasAnswered}
-              className={`flex-shrink-0 h-14 sm:h-16 rounded-2xl px-4 flex items-center gap-3 text-white font-bold transition-all ${
-                isSelected
-                  ? 'bg-muted text-muted-foreground ring-2 ring-muted-foreground/30'
-                  : isOther
-                    ? `${OPTION_COLORS[index]} opacity-60`
-                    : OPTION_COLORS[index]
-              }`}
-            >
-              <span className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center text-white font-black text-sm shrink-0">
-                {OPTION_LABELS[index]}
-              </span>
-              <span className="text-left text-sm leading-tight">{option}</span>
-            </motion.button>
-          );
-        })}
+        {hasAnswered && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+            className="mt-1 flex justify-center"
+          >
+            <p className="rounded-full bg-muted px-4 py-2 text-center text-sm font-semibold text-muted-foreground">
+              ✅ {t('answerLocked')}
+            </p>
+          </motion.div>
+        )}
       </div>
-
-      {/* Spacer */}
-      <div className="flex-1" />
-
-      {/* Answer locked — right below buttons */}
-      {hasAnswered && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2 }}
-          className="flex-shrink-0 mt-2 flex justify-center pb-2"
-        >
-          <p className="rounded-full bg-muted px-4 py-2 text-center text-sm font-semibold text-muted-foreground">
-            ✅ {t('answerLocked')}
-          </p>
-        </motion.div>
-      )}
     </motion.div>
   );
 };
