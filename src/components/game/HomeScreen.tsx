@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useI18n } from '@/i18n';
 import { useGameStore } from '@/stores/gameStore';
 import { useTheme } from '@/hooks/use-theme';
-import QuizklyLogo from '@/assets/quizkly-logo.svg';
+import QuizklyLogo from '@/assets/quizkly-logo.png';
 
 const HomeScreen = () => {
   const { t, lang, setLang } = useI18n();
