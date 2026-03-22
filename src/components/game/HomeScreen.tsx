@@ -55,12 +55,12 @@ const HomeScreen = () => {
           opacity: { type: 'spring', stiffness: 200, damping: 15 },
           y: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
         }}
-        className="flex flex-col items-center pt-8"
+        className="flex flex-col items-center"
       >
         <img
           src={QuizklyLogo}
           alt="Quizkly"
-          className="h-48 w-auto object-contain"
+          className="h-28 sm:h-36 w-auto object-contain"
         />
       </motion.div>
 
