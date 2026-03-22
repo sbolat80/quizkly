@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGame } from '@/context/GameContext';
 import { useI18n } from '@/i18n';
+import { useLockBodyScroll } from '@/hooks/use-lock-body-scroll';
 import { playCountdownTick, playCountdownGo } from '@/lib/sounds';
 
 const CountdownScreen = () => {
