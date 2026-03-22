@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useGameStore } from '@/stores/gameStore';
 import { useI18n } from '@/i18n';
+import { useLockBodyScroll } from '@/hooks/use-lock-body-scroll';
 import { playLeaderboard } from '@/lib/sounds';
 import { getAvatarById } from '@/data/avatars';
 import { supabase } from '@/integrations/supabase/client';
