@@ -52,14 +52,14 @@ const tr = {
   newGame: "Yeni Oyun",
   langEnglish: "İngilizce",
   langTurkish: "Türkçe",
-  avatar1: "Biberik",
+  avatar1: "Cinbi",
   avatar2: "Küpük",
-  avatar3: "Çıtır",
-  avatar4: "Cıvık",
-  avatar5: "Fırdöndü",
-  avatar6: "Tüylü",
-  avatar7: "Benekli",
-  avatar8: "Pembe",
+  avatar3: "Vıcık",
+  avatar4: "Neşeli",
+  avatar5: "Şapşik",
+  avatar6: "Şaşkın",
+  avatar7: "Oburcuk",
+  avatar8: "Pıtırcık",
 } as const;
 
 export default tr;
