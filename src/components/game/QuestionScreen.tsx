@@ -119,7 +119,7 @@ const QuestionScreen = () => {
       </div>
 
       {/* Answer buttons */}
-      <div className="flex-1 flex flex-col gap-2 justify-center min-h-0">
+      <div className="flex-shrink-0 flex flex-col gap-3">
         {options.map((option, index) => {
           const isSelected = selectedAnswer === index;
           const isOther = hasAnswered && !isSelected;
@@ -146,6 +146,9 @@ const QuestionScreen = () => {
           );
         })}
       </div>
+
+      {/* Spacer */}
+      <div className="flex-1" />
 
       {/* Answer locked — right below buttons */}
       {hasAnswered && (
