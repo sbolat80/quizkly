@@ -205,22 +205,31 @@ const WaitingRoom = () => {
         {/* Bottom action */}
         <div className="sticky bottom-0 bg-background pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
           {isHost ? (
-            <div className="flex flex-col items-center gap-1.5">
-              <Button
-                size="lg"
-                className="w-full h-14 text-lg font-extrabold rounded-2xl gap-2 animate-pulse"
-                disabled={players.length < 2 || loading}
-                onClick={startGame}
-              >
-                <Play className="w-5 h-5" />
-                {loading ? t('starting') : t('startGame')}
-              </Button>
-              {players.length < 2 && (
-                <span className="text-xs text-muted-foreground">
-                  {t('minPlayersHint')}
-                </span>
-              )}
-            </div>
+            (() => {
+              const canStart = players.length >= 2 && !loading;
+              return (
+                <div className="flex flex-col items-center gap-1.5">
+                  <Button
+                    size="lg"
+                    className={`w-full h-16 text-xl font-bold rounded-2xl gap-2 shadow-lg transition-all duration-200
+                      ${canStart
+                        ? 'bg-primary text-primary-foreground hover:bg-primary/90 opacity-100'
+                        : 'bg-primary/40 text-primary-foreground/50 opacity-40 cursor-not-allowed'
+                      }`}
+                    disabled={!canStart}
+                    onClick={startGame}
+                  >
+                    <Play className={`w-6 h-6 ${canStart ? 'opacity-100' : 'opacity-50'}`} />
+                    {loading ? t('starting') : t('startGame')}
+                  </Button>
+                  {!canStart && !loading && (
+                    <span className="text-xs text-muted-foreground">
+                      {t('minPlayersHint')}
+                    </span>
+                  )}
+                </div>
+              );
+            })()
           ) : (
             <motion.p
               initial={{ opacity: 0 }}
