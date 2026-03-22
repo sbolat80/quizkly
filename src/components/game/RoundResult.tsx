@@ -5,9 +5,12 @@ import { useGameStore } from '@/stores/gameStore';
 import { useI18n } from '@/i18n';
 import { useLockBodyScroll } from '@/hooks/use-lock-body-scroll';
 import { playCorrect, playWrong, playTimeUp } from '@/lib/sounds';
-import { getAvatarById } from '@/data/avatars';
 import { supabase } from '@/integrations/supabase/client';
 import { useGame } from '@/context/GameContext';
+
+import answerCorrect from '@/assets/answer-correct.png';
+import answerFalse from '@/assets/answer-false.png';
+import answerTimeout from '@/assets/answer-timeout.png';
 
 const RoundResult = () => {
   useLockBodyScroll();
@@ -17,7 +20,6 @@ const RoundResult = () => {
   const currentPlayer = useGameStore((s) => s.currentPlayer);
   const questions = useGameStore((s) => s.questions);
   const currentQuestionIndex = useGameStore((s) => s.currentQuestionIndex);
-  const avatarMap = useGameStore((s) => s.avatarMap);
 
   const playerAnswered = currentPlayer?.currentAnswer != null;
   const isCorrect = currentPlayer?.lastWasCorrect === true;
@@ -28,8 +30,11 @@ const RoundResult = () => {
       ? question.options[resolvedIdx]
       : null;
 
-  const avatarId = avatarMap[currentPlayer?.id] ?? 1;
-  const avatar = getAvatarById(avatarId);
+  const resultImage = !playerAnswered
+    ? answerTimeout
+    : isCorrect
+      ? answerCorrect
+      : answerFalse;
 
   const soundPlayed = useRef(false);
   useEffect(() => {
@@ -63,24 +68,18 @@ const RoundResult = () => {
     return () => { clearInterval(pollInterval); clearTimeout(timeout); };
   }, [game?.id, navigate]);
 
-  const avatarAnimate = playerAnswered
-    ? isCorrect
-      ? { y: [0, -20, 0, -10, 0] }
-      : { x: [-10, 10, -8, 8, 0] }
-    : { rotate: [-5, 5, -3, 3, 0] };
-
-  const avatarTransition = playerAnswered
-    ? isCorrect
-      ? { duration: 0.6 }
-      : { duration: 0.5 }
-    : { duration: 0.4 };
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex min-h-screen flex-col items-center justify-start px-6 pt-16"
+      className={`flex min-h-screen flex-col items-center justify-start px-6 pt-16 transition-colors duration-500
+        ${!playerAnswered
+          ? 'bg-background'
+          : isCorrect
+            ? 'bg-green-500/5'
+            : 'bg-red-500/5'
+        }`}
     >
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
@@ -89,11 +88,18 @@ const RoundResult = () => {
         className="flex flex-col items-center gap-4 text-center"
       >
         <motion.img
-          src={avatar.image}
-          alt={avatar.nameKey}
-          animate={avatarAnimate}
-          transition={avatarTransition}
-          className="h-24 w-24 object-contain"
+          src={resultImage}
+          alt="result"
+          key={!playerAnswered ? 'timeout' : isCorrect ? 'correct' : 'wrong'}
+          className="h-36 w-36 object-contain"
+          animate={
+            !playerAnswered
+              ? { y: [0, -8, 0, -8, 0], rotate: [-3, 3, -3, 3, 0] }
+              : isCorrect
+                ? { y: [0, -20, 0, -12, 0], scale: [1, 1.1, 1, 1.05, 1] }
+                : { x: [-10, 10, -8, 8, -5, 5, 0], rotate: [-5, 5, -3, 3, 0] }
+          }
+          transition={{ duration: 0.6, ease: 'easeInOut' }}
         />
 
         {!playerAnswered && (
@@ -119,20 +125,22 @@ const RoundResult = () => {
 
         {playerAnswered && !isCorrect && (
           <>
-            <XCircle className="h-10 w-10 text-destructive" />
-            <h2 className="text-3xl font-black text-destructive">
+            <XCircle className="h-10 w-10 text-red-500" />
+            <h2 className="text-3xl font-black text-red-500">
               {t('wrong')}
             </h2>
           </>
         )}
 
         {correctAnswerText && (
-          <p className="mt-1 text-base font-semibold text-muted-foreground">
-            {t('correctAnswer')}{' '}
-            <span className="font-black text-foreground">
+          <div className="mt-4 rounded-2xl bg-green-500/10 border border-green-500/30 px-6 py-3 text-center">
+            <p className="text-sm text-muted-foreground">
+              {t('correctAnswer')}
+            </p>
+            <p className="text-base font-black text-green-600 mt-1">
               {correctAnswerText}
-            </span>
-          </p>
+            </p>
+          </div>
         )}
 
         <p className="mt-4 text-sm text-muted-foreground">
