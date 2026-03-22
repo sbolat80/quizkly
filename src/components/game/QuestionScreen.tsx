@@ -32,6 +32,7 @@ const getTimeColor = (timeLeft: number, duration: number) => {
 };
 
 const QuestionScreen = () => {
+  useLockBodyScroll();
   const { t } = useI18n();
   const { submitAnswer } = useGame();
   const game = useGameStore((s) => s.game);
