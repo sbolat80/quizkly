@@ -52,7 +52,7 @@ const en = {
   newGame: "New Game",
   langEnglish: "English",
   langTurkish: "Turkish",
-  avatar1: "Cinbi",
+  avatar1: "Chili",
   avatar2: "Blocko",
   avatar3: "Gloop",
   avatar4: "Sparky",
