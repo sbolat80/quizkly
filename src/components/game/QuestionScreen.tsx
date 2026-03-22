@@ -4,6 +4,7 @@ import { useGameStore } from '@/stores/gameStore';
 import { useGame } from '@/context/GameContext';
 import { useI18n } from '@/i18n';
 import { useServerTimer } from '@/hooks/use-server-timer';
+import { useLockBodyScroll } from '@/hooks/use-lock-body-scroll';
 import { playTap } from '@/lib/sounds';
 import gameConfig from '@/config/gameConfig';
 
