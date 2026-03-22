@@ -119,7 +119,7 @@ const QuestionScreen = () => {
       </div>
 
       {/* Answer buttons */}
-      <div className="flex flex-col gap-3">
+      <div className="flex-1 flex flex-col gap-2 justify-center min-h-0">
         {options.map((option, index) => {
           const isSelected = selectedAnswer === index;
           const isOther = hasAnswered && !isSelected;
@@ -130,7 +130,7 @@ const QuestionScreen = () => {
               whileTap={!hasAnswered ? { scale: 0.97 } : undefined}
               onClick={() => handleAnswer(index)}
               disabled={hasAnswered}
-              className={`h-14 rounded-2xl px-4 flex items-center gap-3 text-white font-bold transition-all ${
+              className={`flex-shrink-0 h-14 sm:h-16 rounded-2xl px-4 flex items-center gap-3 text-white font-bold transition-all ${
                 isSelected
                   ? 'bg-muted text-muted-foreground ring-2 ring-muted-foreground/30'
                   : isOther
