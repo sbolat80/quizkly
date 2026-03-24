@@ -18,7 +18,7 @@ export function TypewriterInput({ placeholderText, value, onChange, ...props }: 
       {...props}
       value={value}
       onChange={onChange}
-      placeholder={showAnimated ? animated : placeholderText}
+      placeholder={showAnimated ? animated : ''}
       onFocus={(e) => { setFocused(true); props.onFocus?.(e); }}
       onBlur={(e) => { setFocused(false); props.onBlur?.(e); }}
     />
