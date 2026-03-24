@@ -74,7 +74,7 @@ const QuestionScreen = () => {
     await submitAnswer(index);
   };
 
-  const displayTime = Math.floor(timeLeft) === 0 ? 1 : Math.floor(timeLeft);
+  const displayTime = timeLeft < 0.5 ? 0 : Math.floor(timeLeft) + 1;
   const timerPercent = Math.max(0, (timeLeft / effectiveTimeLimit) * 100);
 
   const getButtonClass = (index: number) => {
