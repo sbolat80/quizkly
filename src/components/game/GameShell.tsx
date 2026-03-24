@@ -39,7 +39,7 @@ const GameShell = ({ initialCode }: GameShellProps) => {
   };
 
   return (
-    <div className="relative mx-auto min-h-screen w-full max-w-lg overflow-hidden">
+    <div className="relative mx-auto min-h-screen w-full max-w-lg overflow-visible">
       <AnimatePresence mode="wait">
         {renderScreen()}
       </AnimatePresence>

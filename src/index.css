@@ -98,3 +98,14 @@
     text-shadow: 0 0 12px hsl(263 70% 58% / 0.35), 0 0 32px hsl(263 70% 58% / 0.15);
   }
 }
+
+/* Focus ring'in kesilmemesi için */
+* {
+  --tw-ring-offset-width: 2px;
+}
+
+.focus-visible\:ring-2:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(var(--background)),
+              0 0 0 4px hsl(var(--ring));
+}
