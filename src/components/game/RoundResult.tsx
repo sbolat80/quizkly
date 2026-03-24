@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle, XCircle, Clock } from 'lucide-react';
+
 import { useGameStore } from '@/stores/gameStore';
 import { useI18n } from '@/i18n';
 import { useLockBodyScroll } from '@/hooks/use-lock-body-scroll';
@@ -104,7 +104,6 @@ const RoundResult = () => {
 
         {!playerAnswered && (
           <>
-            <Clock className="h-10 w-10 text-muted-foreground" />
             <h2 className="text-3xl font-black text-muted-foreground">
               {t('timesUp')}
             </h2>
@@ -115,21 +114,15 @@ const RoundResult = () => {
         )}
 
         {playerAnswered && isCorrect && (
-          <>
-            <CheckCircle className="h-10 w-10 text-green-500" />
-            <h2 className="text-3xl font-black text-green-500">
-              {t('correct')}
-            </h2>
-          </>
+          <h2 className="text-3xl font-black text-green-500">
+            {t('correct')}
+          </h2>
         )}
 
         {playerAnswered && !isCorrect && (
-          <>
-            <XCircle className="h-10 w-10 text-red-500" />
-            <h2 className="text-3xl font-black text-red-500">
-              {t('wrong')}
-            </h2>
-          </>
+          <h2 className="text-3xl font-black text-red-500">
+            {t('wrong')}
+          </h2>
         )}
 
         {correctAnswerText && (
