@@ -1,35 +1,55 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react'
 
-export function useServerTimer(phaseStartedAt: string | null, duration: number): number {
-  const [timeLeft, setTimeLeft] = useState(duration);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+export function useServerTimer(
+  phaseStartedAt: string | null,
+  duration: number
+): number {
+  const [timeLeft, setTimeLeft] = useState(duration)
+  const prevPhaseStartedAt = useRef<string | null>(null)
+  const isFrozen = useRef(false)
 
   useEffect(() => {
     if (!phaseStartedAt) {
-      setTimeLeft(duration);
-      return;
+      setTimeLeft(duration)
+      return
     }
 
-    const calculate = () => {
-      const elapsed = (Date.now() - new Date(phaseStartedAt).getTime()) / 1000;
-      const remaining = Math.max(0, Math.ceil(duration - elapsed));
-      setTimeLeft(remaining);
-      return remaining;
-    };
+    // Phase değişti mi kontrol et
+    if (prevPhaseStartedAt.current !== phaseStartedAt) {
+      // Yeni phase geldi
+      if (prevPhaseStartedAt.current !== null) {
+        isFrozen.current = true
+        setTimeLeft(0)
+        prevPhaseStartedAt.current = phaseStartedAt
 
-    calculate();
+        const unfreezeTimer = setTimeout(() => {
+          isFrozen.current = false
+          prevPhaseStartedAt.current = phaseStartedAt
+        }, 500)
 
-    intervalRef.current = setInterval(() => {
-      const remaining = calculate();
-      if (remaining <= 0 && intervalRef.current) {
-        clearInterval(intervalRef.current);
+        return () => clearTimeout(unfreezeTimer)
       }
-    }, 1000);
 
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [phaseStartedAt, duration]);
+      prevPhaseStartedAt.current = phaseStartedAt
+    }
 
-  return timeLeft;
+    if (isFrozen.current) return
+
+    const tick = () => {
+      if (isFrozen.current) return
+      const now = Date.now()
+      const start = new Date(phaseStartedAt).getTime()
+      const elapsed = Math.max(0, (now - start) / 1000)
+      const remaining = Math.max(0, duration - elapsed)
+      setTimeLeft(remaining)
+    }
+
+    tick()
+
+    const interval = setInterval(tick, 1000)
+
+    return () => clearInterval(interval)
+  }, [phaseStartedAt, duration])
+
+  return timeLeft
 }
