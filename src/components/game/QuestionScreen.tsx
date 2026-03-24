@@ -47,6 +47,10 @@ const QuestionScreen = () => {
   const question = questionData?.questions ?? questionData;
   const questionText = question?.text || question?.question_text || 'Loading...';
 
+  if (game?.phase !== 'question_active') {
+    return null;
+  }
+
   if (!question) {
     return (
       <motion.div
@@ -74,7 +78,7 @@ const QuestionScreen = () => {
     await submitAnswer(index);
   };
 
-  const displayTime = timeLeft < 0.5 ? 0 : Math.floor(timeLeft) + 1;
+  const displayTime = Math.max(0, Math.ceil(timeLeft));
   const timerPercent = Math.max(0, (timeLeft / effectiveTimeLimit) * 100);
 
   const getButtonClass = (index: number) => {
@@ -100,10 +104,10 @@ const QuestionScreen = () => {
         </span>
         <motion.span
           key={displayTime}
-          initial={{ scale: 1.2, opacity: 0.7 }}
+          initial={displayTime > 0 ? { scale: 1.15, opacity: 0.8 } : { scale: 1, opacity: 1 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.2 }}
-          className={`text-2xl font-black tabular-nums ${getTimeColor(timeLeft, effectiveTimeLimit)} ${timeLeft <= 5 ? 'animate-pulse' : ''}`}
+          transition={{ duration: 0.15 }}
+          className={`text-2xl font-black tabular-nums ${getTimeColor(timeLeft, effectiveTimeLimit)} ${timeLeft <= 3 ? 'animate-pulse' : ''}`}
         >
           {displayTime}s
         </motion.span>
