@@ -87,7 +87,7 @@ const JoinScreen = ({ initialCode }: { initialCode?: string }) => {
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       className="min-h-screen flex flex-col bg-background pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]"
     >
-      <div className="w-full max-w-[428px] mx-auto flex flex-col flex-1 px-4 pt-4">
+      <div className="w-full max-w-[428px] mx-auto flex flex-col flex-1 px-6 pt-4">
         {/* Back button */}
         <div className="flex items-center">
           <Button
@@ -102,7 +102,7 @@ const JoinScreen = ({ initialCode }: { initialCode?: string }) => {
         </div>
 
         {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto flex flex-col gap-5 pt-2">
+        <div className="flex-1 overflow-y-auto flex flex-col gap-5 pt-2 px-2">
           {/* Title */}
           <h2 className="text-3xl font-black text-foreground text-center">
             {t('joinGame')}
@@ -141,14 +141,16 @@ const JoinScreen = ({ initialCode }: { initialCode?: string }) => {
           </div>
 
           {/* Nickname */}
-          <TypewriterInput
-            placeholderText={t('enterNickname')}
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value.slice(0, 16))}
-            maxLength={16}
-            className="h-12 text-center text-lg font-bold rounded-xl bg-card/60 border-border"
-            onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
-          />
+          <div className="w-full px-1">
+            <TypewriterInput
+              placeholderText={t('enterNickname')}
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value.slice(0, 16))}
+              maxLength={16}
+              className="h-12 text-center text-lg font-bold rounded-xl bg-card/60 border-border"
+              onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
+            />
+          </div>
         </div>
 
         {/* Join button - sticky bottom */}
