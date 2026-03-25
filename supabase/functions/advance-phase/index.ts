@@ -76,11 +76,10 @@ Deno.serve(async (req) => {
     if (currentPhase === 'question_active') {
       nextPhase = 'result_phase'
     } else if (currentPhase === 'result_phase') {
-      nextPhase = 'leaderboard'
-    } else if (currentPhase === 'leaderboard') {
-      const nextIndex = currentIdx + 1
-      if (nextIndex >= totalQuestions) {
-        // Game finished — two updates to ensure realtime triggers
+      const isLastQuestion = currentIdx + 1 >= totalQuestions
+
+      if (isLastQuestion) {
+        // Final question: finish immediately after result screen
         await supabase
           .from('games')
           .update({
@@ -89,7 +88,6 @@ Deno.serve(async (req) => {
           })
           .eq('id', gameId)
 
-        // Small delay then update phase separately for a second realtime event
         await new Promise(resolve => setTimeout(resolve, 100))
 
         await supabase
@@ -103,10 +101,12 @@ Deno.serve(async (req) => {
         return new Response(JSON.stringify({ phase: 'finished', status: 'finished', question_index: currentIdx }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
-      } else {
-        nextPhase = 'question_active'
-        nextIdx = nextIndex
       }
+
+      nextPhase = 'leaderboard'
+    } else if (currentPhase === 'leaderboard') {
+      nextPhase = 'question_active'
+      nextIdx = currentIdx + 1
     } else {
       // Initial phase — start with question_active
       nextPhase = 'question_active'

@@ -20,6 +20,8 @@ const RoundResult = () => {
   const currentPlayer = useGameStore((s) => s.currentPlayer);
   const questions = useGameStore((s) => s.questions);
   const currentQuestionIndex = useGameStore((s) => s.currentQuestionIndex);
+  const totalQuestions = game?.total_questions ?? questions.length;
+  const isLastQuestion = currentQuestionIndex + 1 >= totalQuestions;
 
   // Capture result state on mount to prevent flash when state resets
   const snapshotRef = useRef<{ answered: boolean; correct: boolean; correctIdx: number | null } | null>(null);
@@ -147,7 +149,7 @@ const RoundResult = () => {
         )}
 
         <p className="mt-4 text-sm text-muted-foreground">
-          {t('leaderboardComingUp')}
+          {isLastQuestion ? t('gameEndingSoon') : t('leaderboardComingUp')}
         </p>
       </motion.div>
     </motion.div>
