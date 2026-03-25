@@ -186,11 +186,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         } else if (phase === 'leaderboard') {
           const players = await gameService.getGamePlayers(updatedGame.id);
           s.setPlayers(players);
-          // Only show interim leaderboard after the last question;
-          // between rounds, just wait for next question_active phase
           const totalQ = updatedGame.total_questions ?? s.questions.length;
           const currentIdx = updatedGame.current_question_index ?? 0;
-          if (currentIdx + 1 >= totalQ) {
+          // Show interim leaderboard between rounds; skip for last question (final screen will follow)
+          if (currentIdx + 1 < totalQ) {
             s.setScreen('leaderboard');
           }
         }
