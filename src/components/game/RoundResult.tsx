@@ -21,9 +21,19 @@ const RoundResult = () => {
   const questions = useGameStore((s) => s.questions);
   const currentQuestionIndex = useGameStore((s) => s.currentQuestionIndex);
 
-  const playerAnswered = currentPlayer?.currentAnswer != null;
-  const isCorrect = currentPlayer?.lastWasCorrect === true;
-  const resolvedIdx = currentPlayer?.lastCorrectIndex;
+  // Capture result state on mount to prevent flash when state resets
+  const snapshotRef = useRef<{ answered: boolean; correct: boolean; correctIdx: number | null } | null>(null);
+  if (snapshotRef.current === null) {
+    snapshotRef.current = {
+      answered: currentPlayer?.currentAnswer != null,
+      correct: currentPlayer?.lastWasCorrect === true,
+      correctIdx: currentPlayer?.lastCorrectIndex ?? null,
+    };
+  }
+
+  const playerAnswered = snapshotRef.current.answered;
+  const isCorrect = snapshotRef.current.correct;
+  const resolvedIdx = snapshotRef.current.correctIdx;
   const question = questions[currentQuestionIndex];
   const correctAnswerText =
     resolvedIdx != null && question?.options
