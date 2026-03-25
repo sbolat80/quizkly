@@ -20,6 +20,8 @@ const RoundResult = () => {
   const currentPlayer = useGameStore((s) => s.currentPlayer);
   const questions = useGameStore((s) => s.questions);
   const currentQuestionIndex = useGameStore((s) => s.currentQuestionIndex);
+  const totalQuestions = game?.total_questions ?? questions.length;
+  const isLastQuestion = currentQuestionIndex + 1 >= totalQuestions;
 
   // Capture result state on mount to prevent flash when state resets
   const snapshotRef = useRef<{ answered: boolean; correct: boolean; correctIdx: number | null } | null>(null);
@@ -87,8 +89,8 @@ const RoundResult = () => {
         ${!playerAnswered
           ? 'bg-background'
           : isCorrect
-            ? 'bg-green-500/5'
-            : 'bg-red-500/5'
+            ? 'bg-primary/5'
+            : 'bg-destructive/5'
         }`}
     >
       <motion.div
@@ -124,30 +126,30 @@ const RoundResult = () => {
         )}
 
         {playerAnswered && isCorrect && (
-          <h2 className="text-3xl font-black text-green-500">
+          <h2 className="text-3xl font-black text-primary">
             {t('correct')}
           </h2>
         )}
 
         {playerAnswered && !isCorrect && (
-          <h2 className="text-3xl font-black text-red-500">
+          <h2 className="text-3xl font-black text-destructive">
             {t('wrong')}
           </h2>
         )}
 
         {correctAnswerText && (
-          <div className="mt-4 rounded-2xl bg-green-500/10 border border-green-500/30 px-6 py-3 text-center">
+          <div className="mt-4 rounded-2xl border border-primary/30 bg-primary/10 px-6 py-3 text-center">
             <p className="text-sm text-muted-foreground">
               {t('correctAnswer')}
             </p>
-            <p className="text-base font-black text-green-600 mt-1">
+            <p className="mt-1 text-base font-black text-primary">
               {correctAnswerText}
             </p>
           </div>
         )}
 
         <p className="mt-4 text-sm text-muted-foreground">
-          {t('leaderboardComingUp')}
+          {isLastQuestion ? t('gameEndingSoon') : t('leaderboardComingUp')}
         </p>
       </motion.div>
     </motion.div>
