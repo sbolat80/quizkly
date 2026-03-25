@@ -193,9 +193,7 @@ const FinalLeaderboard = () => {
                       src={avatar.image}
                       alt={avatar.nameKey}
                       className={`object-contain rounded-full ${
-                        isFirst
-                          ? 'h-14 w-14 ring-2 ring-accent shadow-lg'
-                          : 'h-10 w-10'
+                        isFirst ? 'h-14 w-14' : 'h-10 w-10'
                       }`}
                       animate={isFirst ? { scale: [1, 1.05, 1] } : {}}
                       transition={isFirst ? { repeat: Infinity, duration: 2, ease: 'easeInOut' } : {}}
