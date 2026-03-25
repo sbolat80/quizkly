@@ -75,9 +75,8 @@ Deno.serve(async (req) => {
 
     if (currentPhase === 'question_active') {
       nextPhase = 'result_phase'
-    } else if (currentPhase === 'result_phase') {
-      nextPhase = 'leaderboard'
-    } else if (currentPhase === 'leaderboard') {
+    } else if (currentPhase === 'result_phase' || currentPhase === 'leaderboard') {
+      // Skip leaderboard phase — go directly to next question or finish
       const nextIndex = currentIdx + 1
       if (nextIndex >= totalQuestions) {
         // Game finished — two updates to ensure realtime triggers
