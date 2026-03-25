@@ -194,7 +194,7 @@ const FinalLeaderboard = () => {
                       alt={avatar.nameKey}
                       className={`object-contain rounded-full ${
                         isFirst
-                          ? 'h-14 w-14 ring-2 ring-yellow-400 shadow-lg'
+                          ? 'h-14 w-14 ring-2 ring-accent shadow-lg'
                           : 'h-10 w-10'
                       }`}
                       animate={isFirst ? { scale: [1, 1.05, 1] } : {}}
