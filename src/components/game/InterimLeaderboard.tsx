@@ -7,8 +7,14 @@ import { playLeaderboard } from '@/lib/sounds';
 import { getAvatarById } from '@/data/avatars';
 import { supabase } from '@/integrations/supabase/client';
 import { useGame } from '@/context/GameContext';
+import { useCountUp } from '@/hooks/use-count-up';
 
 const medals = ['🥇', '🥈', '🥉'];
+
+const AnimatedScore = ({ score, delay }: { score: number; delay: number }) => {
+  const animated = useCountUp(score ?? 0, 1200, delay);
+  return <span className="text-base font-black text-primary">{animated}</span>;
+};
 
 const InterimLeaderboard = () => {
   useLockBodyScroll();
@@ -79,13 +85,14 @@ const InterimLeaderboard = () => {
         {sorted.map((player, i) => {
           const isMe = player.id === currentPlayer?.id;
           const avatar = getAvatarById(avatarMap[player.id] ?? 1);
+          const staggerDelay = i * 0.08;
 
           return (
             <motion.div
               key={player.id}
-              initial={{ x: -24, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: i * 0.07 }}
+              initial={{ y: -30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: staggerDelay, type: 'spring', stiffness: 260, damping: 20 }}
               className={`flex items-center gap-3 rounded-xl px-4 py-3 shadow-sm ${
                 isMe
                   ? 'bg-primary/10 ring-2 ring-primary/40'
@@ -101,7 +108,7 @@ const InterimLeaderboard = () => {
                 alt={avatar.nameKey}
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ type: 'spring', delay: i * 0.07 + 0.15 }}
+                transition={{ type: 'spring', delay: staggerDelay + 0.15 }}
                 className="h-8 w-8 rounded-full object-contain"
               />
 
@@ -114,9 +121,7 @@ const InterimLeaderboard = () => {
                 )}
               </span>
 
-              <span className="text-base font-black text-primary">
-                {player.score ?? 0}
-              </span>
+              <AnimatedScore score={player.score ?? 0} delay={staggerDelay * 1000 + 300} />
             </motion.div>
           );
         })}

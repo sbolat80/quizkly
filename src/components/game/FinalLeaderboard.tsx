@@ -8,8 +8,14 @@ import { Button } from '@/components/ui/button';
 import { Trophy, RotateCcw, Home } from 'lucide-react';
 import { playGameOver } from '@/lib/sounds';
 import { getAvatarById } from '@/data/avatars';
+import { useCountUp } from '@/hooks/use-count-up';
 
 const medals = ['🥇', '🥈', '🥉'];
+
+const AnimatedScore = ({ score, delay, className }: { score: number; delay: number; className?: string }) => {
+  const animated = useCountUp(score ?? 0, 1200, delay);
+  return <span className={className}>{animated}</span>;
+};
 
 const FinalLeaderboard = () => {
   useLockBodyScroll();
@@ -91,9 +97,11 @@ const FinalLeaderboard = () => {
               <p className={`text-center text-xs font-bold text-foreground truncate max-w-full ${isMe ? 'text-primary' : ''}`}>
                 {player.nickname}
               </p>
-              <p className="text-xs font-black text-primary">
-                {player.score ?? 0} {t('pts')}
-              </p>
+              <AnimatedScore
+                score={player.score ?? 0}
+                delay={rankIdx * 150 + 400}
+                className="text-xs font-black text-primary"
+              />
               <div className={`w-full rounded-t-lg bg-primary/20 ${podiumHeights[rankIdx]}`} />
             </motion.div>
           );
@@ -105,13 +113,14 @@ const FinalLeaderboard = () => {
         {sorted.map((player, i) => {
           const isMe = player.id === currentPlayer?.id;
           const avatar = getAvatarById(avatarMap[player.id] ?? 1);
+          const staggerDelay = 0.4 + i * 0.08;
 
           return (
             <motion.div
               key={player.id}
-              initial={{ x: -24, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.4 + i * 0.06 }}
+              initial={{ y: -30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: staggerDelay, type: 'spring', stiffness: 260, damping: 20 }}
               className={`flex items-center gap-3 rounded-xl px-4 py-3 shadow-sm ${
                 isMe ? 'bg-primary/10 ring-2 ring-primary/40' : 'bg-card'
               }`}
@@ -135,9 +144,11 @@ const FinalLeaderboard = () => {
                 )}
               </span>
 
-              <span className="text-base font-black text-primary">
-                {player.score ?? 0}
-              </span>
+              <AnimatedScore
+                score={player.score ?? 0}
+                delay={staggerDelay * 1000 + 300}
+                className="text-base font-black text-primary"
+              />
             </motion.div>
           );
         })}
