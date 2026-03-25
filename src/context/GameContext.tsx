@@ -184,10 +184,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         } else if (phase === 'result_phase') {
           s.setScreen('round_result');
         } else if (phase === 'leaderboard') {
-          // Legacy fallback — treat as result phase
           const players = await gameService.getGamePlayers(updatedGame.id);
           s.setPlayers(players);
-          s.setScreen('round_result');
+          s.setScreen('leaderboard');
         }
 
         scheduleNextPhase(updatedGame);
