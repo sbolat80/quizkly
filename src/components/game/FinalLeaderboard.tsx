@@ -309,12 +309,6 @@ const FinalLeaderboard = () => {
 
       {/* Action buttons */}
       <div className="mt-auto flex w-full max-w-sm flex-col gap-3 pt-6 pb-4">
-        {currentPlayer?.is_host && (
-          <Button onClick={playAgain} size="lg" className="w-full gap-2">
-            <RotateCcw className="h-5 w-5" />
-            {t('playAgain')}
-          </Button>
-        )}
         <Button onClick={goHome} variant="outline" size="lg" className="w-full gap-2">
           <Home className="h-5 w-5" />
           {t('newGame')}
