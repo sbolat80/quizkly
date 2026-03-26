@@ -368,9 +368,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const navigateTo = useCallback((screen: GameScreen) => {
     if (screen === 'question') {
       const { game, currentPlayer } = useGameStore.getState();
-
-      // Wait for the server-side phase change before showing the question screen.
-      // Otherwise the host can hit a local 0s timer while guests stay frozen on the old phase.
+      // Host fires advancePhase to set the server-side phase.
+      // Both host and guest show the question screen immediately;
+      // the timer will start once the realtime subscription delivers phase_started_at.
       if (game && currentPlayer?.is_host) {
         gameService.advancePhase(game.id, {
           question_time_ms: gameConfig.QUESTION_TIME_SECONDS * 1000,
@@ -378,9 +378,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           leaderboard_ms: gameConfig.LEADERBOARD_PHASE_MS,
         }).catch(console.error);
       }
-      return;
     }
-
     store.setScreen(screen);
   }, [store]);
 
