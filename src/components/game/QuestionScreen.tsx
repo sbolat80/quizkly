@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useGameStore } from '@/stores/gameStore';
 import { useGame } from '@/context/GameContext';
@@ -42,7 +42,15 @@ const QuestionScreen = () => {
 
   const questionData = questions[currentQuestionIndex];
   const effectiveTimeLimit = questionData?.timeLimit ?? gameConfig.QUESTION_TIME_SECONDS;
-  const timeLeft = useServerTimer(game?.phase_started_at ?? null, effectiveTimeLimit);
+
+  // Capture the phase_started_at when this question first renders so that
+  // a later phase change doesn't cause the timer to flash back to full duration.
+  const frozenPhaseRef = useRef<string | null>(null);
+  if (game?.phase === 'question_active' && game?.phase_started_at) {
+    frozenPhaseRef.current = game.phase_started_at;
+  }
+  const rawTimeLeft = useServerTimer(frozenPhaseRef.current, effectiveTimeLimit);
+  const timeLeft = Math.min(rawTimeLeft, effectiveTimeLimit);
 
   const question = questionData?.questions ?? questionData;
   const questionText = question?.text || question?.question_text || 'Loading...';
@@ -117,7 +125,7 @@ const QuestionScreen = () => {
       <div className="flex-shrink-0 mb-4 h-3 w-full overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
         <div
           className={`h-full rounded-full ${getBarColor(timeLeft, effectiveTimeLimit)}`}
-          style={{ width: `${timerPercent}%`, transition: 'width 1s linear, background-color 0.5s ease' }}
+          style={{ width: `${timerPercent}%`, transition: 'width 150ms linear, background-color 0.5s ease' }}
         />
       </div>
 
