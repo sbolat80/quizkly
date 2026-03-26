@@ -3,9 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/stores/gameStore';
 import { useGame } from '@/context/GameContext';
 import { useI18n } from '@/i18n';
-import { useLockBodyScroll } from '@/hooks/use-lock-body-scroll';
 import { Button } from '@/components/ui/button';
-import { Trophy, RotateCcw, Home } from 'lucide-react';
+import { Trophy, Home } from 'lucide-react';
 import { playGameOver } from '@/lib/sounds';
 import { getAvatarById } from '@/data/avatars';
 import { useCountUp } from '@/hooks/use-count-up';
@@ -309,12 +308,6 @@ const FinalLeaderboard = () => {
 
       {/* Action buttons */}
       <div className="mt-auto flex w-full max-w-sm flex-col gap-3 pt-6 pb-4">
-        {currentPlayer?.is_host && (
-          <Button onClick={playAgain} size="lg" className="w-full gap-2">
-            <RotateCcw className="h-5 w-5" />
-            {t('playAgain')}
-          </Button>
-        )}
         <Button onClick={goHome} variant="outline" size="lg" className="w-full gap-2">
           <Home className="h-5 w-5" />
           {t('newGame')}
