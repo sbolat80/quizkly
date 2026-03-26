@@ -5,8 +5,7 @@ import { useI18n } from '@/i18n';
 import { useGameStore } from '@/stores/gameStore';
 import { useTheme } from '@/hooks/use-theme';
 import QuizklyLogo from '@/assets/quizkly-logo.png';
-import FlagGB from '@/assets/flag-gb.png';
-import FlagTR from '@/assets/flag-tr.png';
+import FlagIcon from '@/components/ui/FlagIcon';
 
 const HomeScreen = () => {
   const { t, lang, setLang } = useI18n();
@@ -43,7 +42,7 @@ const HomeScreen = () => {
             className="flex items-center gap-1.5 text-sm font-bold transition-colors text-foreground/70 hover:text-foreground">
             
             <Globe className="w-3.5 h-3.5" />
-            <img src={lang === 'en' ? FlagGB : FlagTR} alt="" className="w-6 h-4 object-cover rounded-sm" />
+            <FlagIcon country={lang === 'en' ? 'gb' : 'tr'} className="w-6 h-4" />
             {lang.toUpperCase()}
           </button>
         </div>
