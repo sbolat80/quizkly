@@ -43,7 +43,7 @@ const HomeScreen = () => {
             className="flex items-center gap-1.5 text-sm font-bold transition-colors text-foreground/70 hover:text-foreground">
             
             <Globe className="w-3.5 h-3.5" />
-            <img src={lang === 'en' ? FlagGB : FlagTR} alt="" className="w-4 h-3 object-cover rounded-sm" />
+            <img src={lang === 'en' ? FlagGB : FlagTR} alt="" className="w-6 h-4 object-cover rounded-sm" />
             {lang.toUpperCase()}
           </button>
         </div>
