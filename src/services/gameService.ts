@@ -302,6 +302,8 @@ export async function advancePhase(gameId: string, config?: {
   question_time_ms?: number;
   result_phase_ms?: number;
   leaderboard_ms?: number;
+  expected_phase?: string;
+  expected_phase_started_at?: string;
 }) {
   const { data, error } = await supabase.functions.invoke('advance-phase', {
     body: {
@@ -309,10 +311,12 @@ export async function advancePhase(gameId: string, config?: {
       question_time_ms: config?.question_time_ms ?? gameConfig.QUESTION_TIME_SECONDS * 1000,
       result_phase_ms: config?.result_phase_ms ?? gameConfig.RESULT_PHASE_MS,
       leaderboard_ms: config?.leaderboard_ms ?? gameConfig.LEADERBOARD_PHASE_MS,
+      expected_phase: config?.expected_phase,
+      expected_phase_started_at: config?.expected_phase_started_at,
     },
   });
   if (error) throw error;
-  return data as { phase: string; question_index: number; status?: string };
+  return data as { phase: string; question_index: number; status?: string; already_advanced?: boolean };
 }
 
 export async function resetGame(gameId: string) {
