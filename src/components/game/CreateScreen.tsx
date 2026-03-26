@@ -4,6 +4,7 @@ import { ArrowLeft, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AvatarPicker } from '@/components/ui/avatar-picker';
 import { TypewriterInput } from '@/components/ui/typewriter-input';
+import FlagIcon from '@/components/ui/FlagIcon';
 import { useI18n } from '@/i18n';
 import { useGameStore } from '@/stores/gameStore';
 import { useGame } from '@/context/GameContext';
@@ -70,7 +71,8 @@ const CreateScreen = () => {
                   }`}
                   onClick={() => setQuestionLang(l)}
                 >
-                  {l === 'en' ? '🇬🇧 EN' : '🇹🇷 TR'}
+                  <FlagIcon country={l === 'en' ? 'gb' : 'tr'} className="w-5 h-3.5" />
+                  {l === 'en' ? 'EN' : 'TR'}
                 </Button>
               ))}
             </div>
