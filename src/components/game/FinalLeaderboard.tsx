@@ -100,7 +100,7 @@ const SCORE_COUNT_DURATION = 1200;
 const REVEAL_DELAY = SCORE_START_DELAY + SCORE_COUNT_DURATION + 300; // avatars/names pop in after scores finish
 
 const FinalLeaderboard = () => {
-  useLockBodyScroll();
+  // No body scroll lock — allow scrolling on final screen
   const { t } = useI18n();
   const { goHome, playAgain } = useGame();
   const players = useGameStore((s) => s.players);
