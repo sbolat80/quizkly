@@ -54,28 +54,6 @@ const RoundResult = () => {
     else playTimeUp();
   }, [playerAnswered, isCorrect]);
 
-  // Polling fallback for finished detection
-  useEffect(() => {
-    if (!game?.id) return;
-    const pollInterval = setInterval(async () => {
-      try {
-        const { data } = await supabase
-          .from('games')
-          .select('status, phase')
-          .eq('id', game.id)
-          .single();
-        if (data?.status === 'finished' || data?.phase === 'finished') {
-          console.log('Finished detected by polling (round_result)!');
-          clearInterval(pollInterval);
-          navigate('final');
-        }
-      } catch (e) {
-        console.error('Poll error:', e);
-      }
-    }, 2000);
-    const timeout = setTimeout(() => clearInterval(pollInterval), 30000);
-    return () => { clearInterval(pollInterval); clearTimeout(timeout); };
-  }, [game?.id, navigate]);
 
   return (
     <motion.div
