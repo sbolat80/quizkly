@@ -139,9 +139,9 @@ Deno.serve(async (req) => {
       nextPhase = 'question_active'
     }
 
-    // Conditional update: only update if phase and phase_started_at still match
-    // This prevents TOCTOU race conditions between concurrent clients
-    const { data: updateResult, error: updateErr } = await supabase
+    // Conditional update: only update if phase state still matches.
+    // `phase_started_at` can be null on the very first transition, so use `is(null)` in that case.
+    let updateQuery = supabase
       .from('games')
       .update({
         phase: nextPhase,
@@ -150,20 +150,25 @@ Deno.serve(async (req) => {
       })
       .eq('id', gameId)
       .eq('phase', currentPhase)
-      .eq('phase_started_at', game.phase_started_at)
-      .select()
+
+    updateQuery = game.phase_started_at == null
+      ? updateQuery.is('phase_started_at', null)
+      : updateQuery.eq('phase_started_at', game.phase_started_at)
+
+    const { data: updateResult, error: updateErr } = await updateQuery.select()
 
     if (updateErr || !updateResult || updateResult.length === 0) {
       // Another client already advanced the phase between our read and write
       console.log('Concurrent advance detected, re-fetching current state')
       const { data: freshGame } = await supabase
         .from('games')
-        .select('phase, current_question_index, status')
+        .select('phase, phase_started_at, current_question_index, status')
         .eq('id', gameId)
         .single()
       return new Response(JSON.stringify({
         already_advanced: true,
         phase: freshGame?.phase,
+        phase_started_at: freshGame?.phase_started_at,
         question_index: freshGame?.current_question_index,
         status: freshGame?.status,
       }), {
