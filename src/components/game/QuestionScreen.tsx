@@ -47,9 +47,9 @@ const QuestionScreen = () => {
   const question = questionData?.questions ?? questionData;
   const questionText = question?.text || question?.question_text || 'Loading...';
 
-  if (game?.phase !== 'question_active') {
-    return null;
-  }
+  // Don't guard on phase here — the screen routing in GameShell already
+  // controls visibility. Returning null caused a blank flash for the host
+  // between navigate('question') and advancePhase completing.
 
   if (!question) {
     return (
