@@ -5,6 +5,8 @@ import { useI18n } from '@/i18n';
 import { useGameStore } from '@/stores/gameStore';
 import { useTheme } from '@/hooks/use-theme';
 import QuizklyLogo from '@/assets/quizkly-logo.png';
+import FlagGB from '@/assets/flag-gb.png';
+import FlagTR from '@/assets/flag-tr.png';
 
 const HomeScreen = () => {
   const { t, lang, setLang } = useI18n();
