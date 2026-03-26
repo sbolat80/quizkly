@@ -5,8 +5,6 @@ import { useI18n } from '@/i18n';
 import { useLockBodyScroll } from '@/hooks/use-lock-body-scroll';
 import { playLeaderboard } from '@/lib/sounds';
 import { getAvatarById } from '@/data/avatars';
-import { supabase } from '@/integrations/supabase/client';
-import { useGame } from '@/context/GameContext';
 import { useCountUp } from '@/hooks/use-count-up';
 
 const medals = ['🥇', '🥈', '🥉'];

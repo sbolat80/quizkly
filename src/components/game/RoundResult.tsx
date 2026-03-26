@@ -5,8 +5,6 @@ import { useGameStore } from '@/stores/gameStore';
 import { useI18n } from '@/i18n';
 import { useLockBodyScroll } from '@/hooks/use-lock-body-scroll';
 import { playCorrect, playWrong, playTimeUp } from '@/lib/sounds';
-import { supabase } from '@/integrations/supabase/client';
-import { useGame } from '@/context/GameContext';
 
 import answerCorrect from '@/assets/answer-correct.png';
 import answerFalse from '@/assets/answer-false.png';
@@ -15,7 +13,6 @@ import answerTimeout from '@/assets/answer-timeout.png';
 const RoundResult = () => {
   useLockBodyScroll();
   const { t } = useI18n();
-  const { navigate } = useGame();
   const game = useGameStore((s) => s.game);
   const currentPlayer = useGameStore((s) => s.currentPlayer);
   const questions = useGameStore((s) => s.questions);

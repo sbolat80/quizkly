@@ -386,8 +386,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       // Both host and guest show the question screen immediately;
       // the timer will start once the realtime subscription delivers phase_started_at.
       if (game && currentPlayer?.is_host) {
+        const settings = useGameStore.getState().gameSettings;
+        const questionMs = (settings?.question_time_seconds ?? gameConfig.QUESTION_TIME_SECONDS) * 1000;
         gameService.advancePhase(game.id, {
-          question_time_ms: gameConfig.QUESTION_TIME_SECONDS * 1000,
+          question_time_ms: questionMs,
           result_phase_ms: gameConfig.RESULT_PHASE_MS,
           leaderboard_ms: gameConfig.LEADERBOARD_PHASE_MS,
         }).catch(console.error);
