@@ -140,7 +140,7 @@ Deno.serve(async (req) => {
     }
 
     // Conditional update: only update if phase state still matches.
-    // `phase_started_at` can be null on the very first transition, so use `is(null)` in that case.
+    // The first transition starts from NULL phase / NULL phase_started_at, so both must use IS NULL.
     let updateQuery = supabase
       .from('games')
       .update({
@@ -149,7 +149,10 @@ Deno.serve(async (req) => {
         current_question_index: nextIdx,
       })
       .eq('id', gameId)
-      .eq('phase', currentPhase)
+
+    updateQuery = currentPhase == null
+      ? updateQuery.is('phase', null)
+      : updateQuery.eq('phase', currentPhase)
 
     updateQuery = game.phase_started_at == null
       ? updateQuery.is('phase_started_at', null)
@@ -158,7 +161,6 @@ Deno.serve(async (req) => {
     const { data: updateResult, error: updateErr } = await updateQuery.select()
 
     if (updateErr || !updateResult || updateResult.length === 0) {
-      // Another client already advanced the phase between our read and write
       console.log('Concurrent advance detected, re-fetching current state')
       const { data: freshGame } = await supabase
         .from('games')
