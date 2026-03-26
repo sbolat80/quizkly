@@ -147,6 +147,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         };
       });
       console.log('Mapped questions:', mapped);
+      useGameStore.getState().setGameSettings({
+        question_time_seconds: settings.question_time_seconds ?? gameConfig.QUESTION_TIME_SECONDS,
+      });
       useGameStore.getState().setQuestions(mapped);
       useGameStore.getState().setCurrentQuestionIndex(updatedGame.current_question_index ?? 0);
       useGameStore.getState().setScreen('countdown');
