@@ -366,17 +366,22 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const navigateTo = useCallback((screen: GameScreen) => {
-    store.setScreen(screen);
     if (screen === 'question') {
       const { game, currentPlayer } = useGameStore.getState();
       if (game && currentPlayer?.is_host) {
+        // Optimistically set phase_started_at so the timer starts immediately
+        const now = new Date().toISOString();
+        store.setGame({ ...game, phase: 'question_active', phase_started_at: now });
+        store.setScreen(screen);
         gameService.advancePhase(game.id, {
           question_time_ms: gameConfig.QUESTION_TIME_SECONDS * 1000,
           result_phase_ms: gameConfig.RESULT_PHASE_MS,
           leaderboard_ms: gameConfig.LEADERBOARD_PHASE_MS,
         }).catch(console.error);
+        return;
       }
     }
+    store.setScreen(screen);
   }, [store]);
 
   const value: GameContextType = {
