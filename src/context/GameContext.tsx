@@ -69,6 +69,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
     phaseTimerRef.current = setTimeout(async () => {
       try {
+        // Client-side guard: check if phase already changed before making the network call
+        const currentGame = useGameStore.getState().game;
+        if (currentGame && (currentGame.phase !== expectedPhase || currentGame.phase_started_at !== expectedPhaseStartedAt)) {
+          console.log('Phase already changed client-side, skipping advancePhase call');
+          return;
+        }
         console.log('Calling advancePhase (any client)...', { expectedPhase, expectedPhaseStartedAt });
         const result = await gameService.advancePhase(updatedGame.id, {
           question_time_ms: gameConfig.QUESTION_TIME_SECONDS * 1000,
