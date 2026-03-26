@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
     )
 
     const body = await req.json()
-    const { gameId, result_phase_ms = 3000, leaderboard_ms = 4000 } = body
+    const { gameId, expected_phase, expected_phase_started_at } = body
 
     if (!gameId) {
       return new Response(JSON.stringify({ error: 'gameId required' }), {
@@ -39,22 +39,49 @@ Deno.serve(async (req) => {
       })
     }
 
+    // Idempotency check: if caller specifies expected_phase and/or expected_phase_started_at,
+    // verify the game is still in that state. If not, another client already advanced it.
+    if (expected_phase && game.phase !== expected_phase) {
+      console.log('Already advanced. Expected:', expected_phase, 'Current:', game.phase)
+      return new Response(JSON.stringify({
+        already_advanced: true,
+        phase: game.phase,
+        question_index: game.current_question_index,
+        status: game.status,
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    if (expected_phase_started_at && game.phase_started_at !== expected_phase_started_at) {
+      console.log('Phase started_at mismatch. Expected:', expected_phase_started_at, 'Current:', game.phase_started_at)
+      return new Response(JSON.stringify({
+        already_advanced: true,
+        phase: game.phase,
+        question_index: game.current_question_index,
+        status: game.status,
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    if (game.status === 'finished') {
+      return new Response(JSON.stringify({
+        already_advanced: true,
+        phase: 'finished',
+        question_index: game.current_question_index,
+        status: 'finished',
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     if (game.status !== 'in_progress') {
       return new Response(JSON.stringify({ error: 'Game not in progress' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
-
-    // Read game_settings for question time
-    const { data: settings } = await supabase
-      .from('game_settings')
-      .select('question_time_seconds, questions_per_game')
-      .eq('game_id', gameId)
-      .maybeSingle()
-
-    const questionTimeSec = settings?.question_time_seconds ?? 15
-    const questionTimeMs = body.question_time_ms ?? questionTimeSec * 1000
 
     // Get actual question count from game_questions table
     const { count: actualTotal } = await supabase
@@ -68,7 +95,7 @@ Deno.serve(async (req) => {
     const currentIdx = game.current_question_index ?? 0
     const now = new Date().toISOString()
 
-    console.log('advance-phase:', { currentPhase, currentIdx, totalQuestions, actualTotal, questionTimeMs, settings })
+    console.log('advance-phase:', { currentPhase, currentIdx, totalQuestions, actualTotal })
 
     let nextPhase: string
     let nextIdx = currentIdx

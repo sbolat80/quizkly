@@ -52,10 +52,6 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const scheduleNextPhase = useCallback((updatedGame: any) => {
     clearPhaseTimer();
 
-    const state = useGameStore.getState();
-    const isHost = state.currentPlayer?.is_host;
-    if (!isHost) return;
-
     if (!updatedGame.phase_started_at || !updatedGame.phase) return;
 
     const duration = PHASE_DURATIONS[updatedGame.phase as keyof typeof PHASE_DURATIONS];
@@ -64,15 +60,28 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const elapsed = Date.now() - new Date(updatedGame.phase_started_at).getTime();
     const remaining = Math.max(0, duration - elapsed);
 
+    // Add a small random jitter (0-500ms) so not all clients fire at exactly the same time
+    const jitter = Math.floor(Math.random() * 500);
+
+    // Capture the expected phase state for idempotency
+    const expectedPhase = updatedGame.phase;
+    const expectedPhaseStartedAt = updatedGame.phase_started_at;
+
     phaseTimerRef.current = setTimeout(async () => {
       try {
-        console.log('Calling advancePhase...');
+        console.log('Calling advancePhase (any client)...', { expectedPhase, expectedPhaseStartedAt });
         const result = await gameService.advancePhase(updatedGame.id, {
           question_time_ms: gameConfig.QUESTION_TIME_SECONDS * 1000,
           result_phase_ms: gameConfig.RESULT_PHASE_MS,
           leaderboard_ms: gameConfig.LEADERBOARD_PHASE_MS,
+          expected_phase: expectedPhase,
+          expected_phase_started_at: expectedPhaseStartedAt,
         });
         console.log('advancePhase result:', result);
+        if (result?.already_advanced) {
+          console.log('Phase already advanced by another client, ignoring.');
+          return;
+        }
         if (result?.phase === 'finished' || result?.status === 'finished') {
           console.log('GAME FINISHED from advancePhase!');
           clearPhaseTimer();
@@ -81,7 +90,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       } catch (e) {
         console.error('advancePhase failed:', e);
       }
-    }, remaining);
+    }, remaining + jitter);
   }, [clearPhaseTimer]);
 
   const resetPlayerAnswerState = useCallback(() => {
