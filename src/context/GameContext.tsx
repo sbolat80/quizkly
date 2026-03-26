@@ -340,7 +340,6 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         currentAnswer: optionIndex,
         lastWasCorrect: result.is_correct,
         lastCorrectIndex: result.correct_index,
-        score: (latest?.score ?? 0) + (result.points_awarded ?? 0),
       });
       return result;
     } catch (e) {
