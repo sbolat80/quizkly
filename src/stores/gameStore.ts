@@ -11,6 +11,7 @@ interface GameStore {
   timeLeft: number;
   loading: boolean;
   avatarMap: Record<string, number>;
+  gameSettings: { question_time_seconds: number } | null;
 
   setScreen: (screen: GameScreen) => void;
   setGame: (game: any) => void;
@@ -21,6 +22,7 @@ interface GameStore {
   setTimeLeft: (time: number) => void;
   setLoading: (loading: boolean) => void;
   setAvatarMap: (map: Record<string, number>) => void;
+  setGameSettings: (settings: { question_time_seconds: number }) => void;
   reset: () => void;
 }
 
@@ -34,6 +36,7 @@ const initialState = {
   timeLeft: 0,
   loading: false,
   avatarMap: {},
+  gameSettings: null as { question_time_seconds: number } | null,
 };
 
 export const useGameStore = create<GameStore>((set) => ({
@@ -47,5 +50,6 @@ export const useGameStore = create<GameStore>((set) => ({
   setTimeLeft: (time) => set({ timeLeft: time }),
   setLoading: (loading) => set({ loading }),
   setAvatarMap: (map) => set({ avatarMap: map }),
+  setGameSettings: (settings) => set({ gameSettings: settings }),
   reset: () => set(initialState),
 }));

@@ -5,8 +5,6 @@ import { useI18n } from '@/i18n';
 import { useLockBodyScroll } from '@/hooks/use-lock-body-scroll';
 import { playLeaderboard } from '@/lib/sounds';
 import { getAvatarById } from '@/data/avatars';
-import { supabase } from '@/integrations/supabase/client';
-import { useGame } from '@/context/GameContext';
 import { useCountUp } from '@/hooks/use-count-up';
 
 const medals = ['🥇', '🥈', '🥉'];
@@ -19,7 +17,6 @@ const AnimatedScore = ({ score, delay }: { score: number; delay: number }) => {
 const InterimLeaderboard = () => {
   useLockBodyScroll();
   const { t } = useI18n();
-  const { navigate } = useGame();
   const game = useGameStore((s) => s.game);
   const players = useGameStore((s) => s.players);
   const currentPlayer = useGameStore((s) => s.currentPlayer);
@@ -38,28 +35,6 @@ const InterimLeaderboard = () => {
     playLeaderboard();
   }, []);
 
-  // Polling fallback for finished detection
-  useEffect(() => {
-    if (!game?.id) return;
-    const pollInterval = setInterval(async () => {
-      try {
-        const { data } = await supabase
-          .from('games')
-          .select('status, phase')
-          .eq('id', game.id)
-          .single();
-        if (data?.status === 'finished' || data?.phase === 'finished') {
-          console.log('Finished detected by polling (leaderboard)!');
-          clearInterval(pollInterval);
-          navigate('final');
-        }
-      } catch (e) {
-        console.error('Poll error:', e);
-      }
-    }, 2000);
-    const timeout = setTimeout(() => clearInterval(pollInterval), 30000);
-    return () => { clearInterval(pollInterval); clearTimeout(timeout); };
-  }, [game?.id, navigate]);
 
   return (
     <motion.div

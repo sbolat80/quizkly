@@ -6,11 +6,16 @@ import gameConfig from '@/config/gameConfig';
 import type { GameScreen } from '@/types/game';
 import { toast } from 'sonner';
 
-const PHASE_DURATIONS = {
-  question_active: gameConfig.QUESTION_TIME_SECONDS * 1000,
-  result_phase: gameConfig.RESULT_PHASE_MS,
-  leaderboard: gameConfig.LEADERBOARD_PHASE_MS,
-};
+/** Returns phase durations in ms, using DB settings when available */
+function getPhaseDurations() {
+  const settings = useGameStore.getState().gameSettings;
+  const questionMs = (settings?.question_time_seconds ?? gameConfig.QUESTION_TIME_SECONDS) * 1000;
+  return {
+    question_active: questionMs,
+    result_phase: gameConfig.RESULT_PHASE_MS,
+    leaderboard: gameConfig.LEADERBOARD_PHASE_MS,
+  };
+}
 
 interface GameContextType {
   createGame: (nickname: string, avatarId: number, language: string) => Promise<void>;
@@ -54,7 +59,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
     if (!updatedGame.phase_started_at || !updatedGame.phase) return;
 
-    const duration = PHASE_DURATIONS[updatedGame.phase as keyof typeof PHASE_DURATIONS];
+    const durations = getPhaseDurations();
+    const duration = durations[updatedGame.phase as keyof typeof durations];
     if (!duration) return;
 
     const elapsed = Date.now() - new Date(updatedGame.phase_started_at).getTime();
@@ -69,15 +75,20 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
     phaseTimerRef.current = setTimeout(async () => {
       try {
-        // Client-side guard: check if phase already changed before making the network call
+        // Client-side guard: re-check store state before making the network call
         const currentGame = useGameStore.getState().game;
-        if (currentGame && (currentGame.phase !== expectedPhase || currentGame.phase_started_at !== expectedPhaseStartedAt)) {
+        if (!currentGame) return;
+        if (currentGame.phase !== expectedPhase || currentGame.phase_started_at !== expectedPhaseStartedAt) {
           console.log('Phase already changed client-side, skipping advancePhase call');
           return;
         }
+
+        const settings = useGameStore.getState().gameSettings;
+        const questionMs = (settings?.question_time_seconds ?? gameConfig.QUESTION_TIME_SECONDS) * 1000;
+
         console.log('Calling advancePhase (any client)...', { expectedPhase, expectedPhaseStartedAt });
         const result = await gameService.advancePhase(updatedGame.id, {
-          question_time_ms: gameConfig.QUESTION_TIME_SECONDS * 1000,
+          question_time_ms: questionMs,
           result_phase_ms: gameConfig.RESULT_PHASE_MS,
           leaderboard_ms: gameConfig.LEADERBOARD_PHASE_MS,
           expected_phase: expectedPhase,
@@ -136,6 +147,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         };
       });
       console.log('Mapped questions:', mapped);
+      useGameStore.getState().setGameSettings({
+        question_time_seconds: settings.question_time_seconds ?? gameConfig.QUESTION_TIME_SECONDS,
+      });
       useGameStore.getState().setQuestions(mapped);
       useGameStore.getState().setCurrentQuestionIndex(updatedGame.current_question_index ?? 0);
       useGameStore.getState().setScreen('countdown');
@@ -372,8 +386,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       // Both host and guest show the question screen immediately;
       // the timer will start once the realtime subscription delivers phase_started_at.
       if (game && currentPlayer?.is_host) {
+        const settings = useGameStore.getState().gameSettings;
+        const questionMs = (settings?.question_time_seconds ?? gameConfig.QUESTION_TIME_SECONDS) * 1000;
         gameService.advancePhase(game.id, {
-          question_time_ms: gameConfig.QUESTION_TIME_SECONDS * 1000,
+          question_time_ms: questionMs,
           result_phase_ms: gameConfig.RESULT_PHASE_MS,
           leaderboard_ms: gameConfig.LEADERBOARD_PHASE_MS,
         }).catch(console.error);
