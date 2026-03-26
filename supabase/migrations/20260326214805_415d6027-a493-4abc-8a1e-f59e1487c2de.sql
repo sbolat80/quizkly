@@ -1,0 +1,1 @@
+TRUNCATE answers, game_questions, game_settings, players, games CASCADE;
