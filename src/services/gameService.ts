@@ -295,7 +295,7 @@ export async function submitAnswer(
     body: { gameId, questionId, playerId, sessionId, submittedAnswer, responseTimeMs },
   });
   if (error) throw error;
-  return data as { is_correct: boolean; points_awarded: number; correct_index: number };
+  return data as { is_correct: boolean; points_awarded: number; correct_index: number; question_time_seconds: number };
 }
 
 export async function advancePhase(gameId: string, config?: {

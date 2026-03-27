@@ -59,10 +59,20 @@ Deno.serve(async (req) => {
     const isCorrect = submittedAnswer === correctAnswer
     const correctIndex = options.indexOf(correctAnswer)
 
-    // Calculate points: base 1000, minus time penalty
+    // Read question_time_seconds from game_settings
+    const { data: settings } = await supabase
+      .from('game_settings')
+      .select('question_time_seconds')
+      .eq('game_id', gameId)
+      .maybeSingle()
+
+    const questionTimeSeconds = settings?.question_time_seconds ?? 15
+    const questionTimeMs = questionTimeSeconds * 1000
+
+    // Calculate points: base 1000, minus time penalty proportional to actual question duration
     let pointsAwarded = 0
     if (isCorrect) {
-      const timeFactor = Math.max(0, 1 - (responseTimeMs || 0) / 15000)
+      const timeFactor = Math.max(0, 1 - (responseTimeMs || 0) / questionTimeMs)
       pointsAwarded = Math.round(500 + 500 * timeFactor)
     }
 
@@ -90,6 +100,7 @@ Deno.serve(async (req) => {
       is_correct: isCorrect,
       points_awarded: pointsAwarded,
       correct_index: correctIndex,
+      question_time_seconds: questionTimeSeconds,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
