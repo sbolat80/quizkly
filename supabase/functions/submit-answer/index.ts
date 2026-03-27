@@ -100,6 +100,7 @@ Deno.serve(async (req) => {
       is_correct: isCorrect,
       points_awarded: pointsAwarded,
       correct_index: correctIndex,
+      question_time_seconds: questionTimeSeconds,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
