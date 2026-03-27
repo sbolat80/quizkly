@@ -274,11 +274,10 @@ export async function startGame(gameId: string, language: string) {
 }
 
 export async function getGameQuestions(gameId: string) {
-  const { data, error } = await supabase
-    .from('game_questions')
-    .select('*, questions(*)')
-    .eq('game_id', gameId)
-    .order('question_order', { ascending: true });
+  const sessionId = getSessionId();
+  const { data, error } = await supabase.functions.invoke('get-game-questions', {
+    body: { gameId, sessionId },
+  });
   if (error) throw error;
   return data ?? [];
 }

@@ -141,7 +141,6 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           question_id: q.id,
           text: q.question_text ?? q.text ?? '',
           options,
-          correctAnswer: q.correct_answer ?? '',
           category: q.category ?? '',
           timeLimit: settings.question_time_seconds,
         };
