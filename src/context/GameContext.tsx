@@ -210,6 +210,31 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           resetPlayerAnswerState();
           s.setScreen('question');
         } else if (phase === 'result_phase') {
+          // If player didn't answer, auto-submit timeout to get correct answer
+          const cp = s.currentPlayer;
+          if (cp && cp.currentAnswer == null) {
+            try {
+              const q = s.questions[s.currentQuestionIndex];
+              if (q) {
+                const result = await gameService.submitAnswer(
+                  updatedGame.id,
+                  q.question_id ?? q.id,
+                  cp.id,
+                  getSessionId(),
+                  '__timeout__',
+                  (s.gameSettings?.question_time_seconds ?? 15) * 1000
+                );
+                s.setCurrentPlayer({
+                  ...useGameStore.getState().currentPlayer,
+                  currentAnswer: null, // keep null to show "time's up"
+                  lastWasCorrect: false,
+                  lastCorrectIndex: result.correct_index,
+                });
+              }
+            } catch (e) {
+              console.error('Timeout auto-submit failed:', e);
+            }
+          }
           s.setScreen('round_result');
         } else if (phase === 'leaderboard') {
           const players = await gameService.getGamePlayers(updatedGame.id);
