@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Globe, Zap, Users, Sun, Moon } from 'lucide-react';
+import { Zap, Users, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useI18n } from '@/i18n';
 import { useGameStore } from '@/stores/gameStore';
