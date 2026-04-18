@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Globe, Zap, Users, Sun, Moon } from 'lucide-react';
+import { Zap, Users, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useI18n } from '@/i18n';
 import { useGameStore } from '@/stores/gameStore';
@@ -41,7 +41,6 @@ const HomeScreen = () => {
             onClick={toggleLang}
             className="flex items-center gap-1.5 text-sm font-bold transition-colors text-foreground/70 hover:text-foreground">
             
-            <Globe className="w-3.5 h-3.5" />
             <FlagIcon country={lang === 'en' ? 'gb' : 'tr'} className="w-6 h-4" />
             {lang.toUpperCase()}
           </button>
