@@ -94,7 +94,7 @@ Deno.serve(async (req) => {
     if ((existing ?? 0) === 0) {
       const { data: allQuestions, error: qErr } = await supabase
         .from('questions')
-        .select('id, category')
+        .select('id, category, times_played, last_played_at')
         .eq('is_active', true)
         .eq('language', language)
 
@@ -112,14 +112,30 @@ Deno.serve(async (req) => {
         })
       }
 
-      // Group by category and shuffle
+      // Sort by times_played ASC, last_played_at ASC NULLS FIRST, random tiebreak
+      const sortByLeastPlayed = (arr: typeof allQuestions) => {
+        return [...arr]
+          .map((q) => ({ q, r: Math.random() }))
+          .sort((a, b) => {
+            const tpA = a.q.times_played ?? 0
+            const tpB = b.q.times_played ?? 0
+            if (tpA !== tpB) return tpA - tpB
+            const lpA = a.q.last_played_at ? new Date(a.q.last_played_at).getTime() : -Infinity
+            const lpB = b.q.last_played_at ? new Date(b.q.last_played_at).getTime() : -Infinity
+            if (lpA !== lpB) return lpA - lpB
+            return a.r - b.r
+          })
+          .map((x) => x.q)
+      }
+
+      // Group by category and apply least-played ordering within each
       const categoryGroups: Record<string, typeof allQuestions> = {}
       for (const q of allQuestions) {
         if (!categoryGroups[q.category]) categoryGroups[q.category] = []
         categoryGroups[q.category].push(q)
       }
       for (const cat of Object.keys(categoryGroups)) {
-        categoryGroups[cat] = shuffle(categoryGroups[cat])
+        categoryGroups[cat] = sortByLeastPlayed(categoryGroups[cat])
       }
 
       // Select by distribution
@@ -140,9 +156,9 @@ Deno.serve(async (req) => {
         }
       }
 
-      // Fill remaining from any category
+      // Fill remaining using least-played across all categories
       if (selected.length < needed) {
-        const remaining = shuffle(allQuestions.filter(q => !selectedIds.has(q.id)))
+        const remaining = sortByLeastPlayed(allQuestions.filter(q => !selectedIds.has(q.id)))
         for (const q of remaining) {
           if (selected.length >= needed) break
           selected.push(q)
@@ -150,6 +166,7 @@ Deno.serve(async (req) => {
         }
       }
 
+      // Final presentation order: shuffle so categories are interleaved
       const shuffled = shuffle(selected)
       const { error: insertErr } = await supabase
         .from('game_questions')
@@ -165,6 +182,23 @@ Deno.serve(async (req) => {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
+      }
+
+      // Increment times_played and update last_played_at on selected questions
+      const nowIso = new Date().toISOString()
+      const updates = shuffled.map((q) =>
+        supabase
+          .from('questions')
+          .update({
+            times_played: (q.times_played ?? 0) + 1,
+            last_played_at: nowIso,
+          })
+          .eq('id', q.id)
+      )
+      const updateResults = await Promise.all(updates)
+      const updateError = updateResults.find((r) => r.error)
+      if (updateError?.error) {
+        console.error('Failed to update question play stats:', updateError.error)
       }
     }
 
