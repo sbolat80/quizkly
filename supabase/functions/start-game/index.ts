@@ -184,18 +184,23 @@ Deno.serve(async (req) => {
         })
       }
 
-      // Increment times_played and update last_played_at on selected questions
+      // Bulk update times_played and last_played_at on selected questions.
+      // Group by current times_played so each new value can be set in one update.
       const nowIso = new Date().toISOString()
-      const updates = shuffled.map((q) =>
-        supabase
-          .from('questions')
-          .update({
-            times_played: (q.times_played ?? 0) + 1,
-            last_played_at: nowIso,
-          })
-          .eq('id', q.id)
+      const groups = new Map<number, string[]>()
+      for (const q of shuffled) {
+        const tp = q.times_played ?? 0
+        if (!groups.has(tp)) groups.set(tp, [])
+        groups.get(tp)!.push(q.id)
+      }
+      const updateResults = await Promise.all(
+        Array.from(groups.entries()).map(([tp, ids]) =>
+          supabase
+            .from('questions')
+            .update({ times_played: tp + 1, last_played_at: nowIso })
+            .in('id', ids)
+        )
       )
-      const updateResults = await Promise.all(updates)
       const updateError = updateResults.find((r) => r.error)
       if (updateError?.error) {
         console.error('Failed to update question play stats:', updateError.error)
