@@ -186,18 +186,17 @@ const FinalLeaderboard = () => {
 
       {/* Podium: groups of tied players share each podium step */}
       <div className="mt-8 flex items-end justify-center gap-3 w-full max-w-xs">
-        {podiumDisplayOrder.map((rank) => {
+        {podiumDisplayOrder
+          .filter((rank) => podiumGroups[rank] && podiumGroups[rank].length > 0)
+          .map((rank) => {
           const group = podiumGroups[rank];
-          if (!group || group.length === 0) {
-            return <div key={rank} className="flex-1" />;
-          }
           const isFirst = rank === 1;
           const podiumHeight = PODIUM_PIXELS[rank];
 
           return (
             <div key={rank} className="flex flex-1 flex-col items-center gap-1">
-              {/* Stack of tied players above the podium */}
-              <div className="flex items-end justify-center gap-1 flex-wrap">
+              {/* Row of tied players above the podium (side-by-side) */}
+              <div className="flex items-end justify-center gap-2">
                 {group.map(({ player }) => {
                   const avatar = getAvatarById(player.avatar_id ?? avatarMap[player.id] ?? 1);
                   const isMe = player.id === currentPlayer?.id;
