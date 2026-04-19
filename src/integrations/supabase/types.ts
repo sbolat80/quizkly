@@ -256,8 +256,10 @@ export type Database = {
           id: string
           is_active: boolean | null
           language: string | null
+          last_played_at: string | null
           options: Json
           question_text: string
+          times_played: number | null
           type: string | null
         }
         Insert: {
@@ -269,8 +271,10 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           language?: string | null
+          last_played_at?: string | null
           options: Json
           question_text: string
+          times_played?: number | null
           type?: string | null
         }
         Update: {
@@ -282,8 +286,10 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           language?: string | null
+          last_played_at?: string | null
           options?: Json
           question_text?: string
+          times_played?: number | null
           type?: string | null
         }
         Relationships: []
@@ -293,6 +299,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      assign_game_questions: {
+        Args: {
+          p_game_id: string
+          p_language?: string
+          p_question_count?: number
+        }
+        Returns: undefined
+      }
       generate_game_code: { Args: { code_length?: number }; Returns: string }
       increment_player_score: {
         Args: { p_player_id: string; p_points: number }
