@@ -194,7 +194,7 @@ const FinalLeaderboard = () => {
           const podiumHeight = PODIUM_PIXELS[rank];
 
           return (
-            <div key={rank} className="flex flex-1 flex-col items-center gap-1">
+            <div key={rank} className="flex w-24 flex-col items-center gap-1">
               {/* Row of tied players above the podium (side-by-side) */}
               <div className="flex items-end justify-center gap-2">
                 {group.map(({ player }) => {
