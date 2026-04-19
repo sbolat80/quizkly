@@ -108,25 +108,32 @@ const FinalLeaderboard = () => {
   const currentPlayer = useGameStore((s) => s.currentPlayer);
   const avatarMap = useGameStore((s) => s.avatarMap);
 
-  /* Sort players by score desc, compute dense ranks (ties share rank) */
+  /* Normalize scores first so ties work even if values arrive as strings/null */
   const ranked = useMemo(() => {
-    const sorted = [...players].sort((a, b) => (Number(b.score) || 0) - (Number(a.score) || 0));
+    const normalized = players
+      .map((player, index) => ({
+        player,
+        score: Number.isFinite(Number(player.score)) ? Number(player.score) : 0,
+        index,
+      }))
+      .sort((a, b) => (b.score - a.score) || (a.index - b.index));
+
     let lastScore: number | null = null;
     let lastRank = 0;
-    return sorted.map((p, i) => {
-      const score = Number(p.score) || 0;
+
+    return normalized.map(({ player, score }, i) => {
       if (lastScore === null || score !== lastScore) {
         lastRank = i + 1;
         lastScore = score;
       }
-      return { player: p, rank: lastRank };
+
+      return { player, rank: lastRank, score };
     });
   }, [players]);
 
-  /* Tie at top? (2+ players share rank 1) */
-  const topRankCount = ranked.filter((r) => r.rank === 1).length;
-  const isTieAtTop = topRankCount > 1;
-  const winner = !isTieAtTop ? ranked[0]?.player : null;
+  const topScore = ranked[0]?.score ?? null;
+  const isTieAtTop = topScore !== null && ranked.filter((r) => r.score === topScore).length > 1;
+  const winner = isTieAtTop ? null : ranked[0]?.player ?? null;
 
   /* Group into podium positions (rank 1, 2, 3). Each group can hold multiple tied players. */
   const podiumGroups = useMemo(() => {
