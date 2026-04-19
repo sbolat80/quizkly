@@ -110,11 +110,11 @@ const FinalLeaderboard = () => {
 
   /* Sort players by score desc, compute dense ranks (ties share rank) */
   const ranked = useMemo(() => {
-    const sorted = [...players].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+    const sorted = [...players].sort((a, b) => (Number(b.score) || 0) - (Number(a.score) || 0));
     let lastScore: number | null = null;
     let lastRank = 0;
     return sorted.map((p, i) => {
-      const score = p.score ?? 0;
+      const score = Number(p.score) || 0;
       if (lastScore === null || score !== lastScore) {
         lastRank = i + 1;
         lastScore = score;
