@@ -102,7 +102,7 @@ const InterimLeaderboard = () => {
         })}
       </div>
 
-      <p className="mt-auto pb-4 text-sm text-muted-foreground">
+      <p className="mt-6 pb-4 text-sm text-muted-foreground">
         {isLastQuestion ? t('gameEndingSoon') : t('nextQuestionComing')}
       </p>
     </motion.div>
