@@ -47,6 +47,7 @@ const en = {
   gameEndingSoon: "Game ending soon...",
   gameOver: "Game Over",
   congratulations: "Congratulations, {name}!",
+  itsATie: "It's a tie!",
   pts: "pts",
   playAgain: "Play Again",
   newGame: "New Game",

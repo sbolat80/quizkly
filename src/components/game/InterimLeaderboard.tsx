@@ -59,7 +59,7 @@ const InterimLeaderboard = () => {
       <div className="mt-8 w-full max-w-sm flex flex-col gap-2">
         {sorted.map((player, i) => {
           const isMe = player.id === currentPlayer?.id;
-          const avatar = getAvatarById(avatarMap[player.id] ?? 1);
+          const avatar = getAvatarById(player.avatar_id ?? avatarMap[player.id] ?? 1);
           const staggerDelay = i * 0.08;
 
           return (
