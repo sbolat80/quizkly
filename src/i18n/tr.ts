@@ -47,6 +47,7 @@ const tr = {
   gameEndingSoon: "Oyun yakında bitiyor...",
   gameOver: "Oyun Bitti",
   congratulations: "Tebrikler, {name}!",
+  itsATie: "Berabere!",
   pts: "puan",
   playAgain: "Tekrar Oyna",
   newGame: "Yeni Oyun",
