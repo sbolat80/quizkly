@@ -56,14 +56,6 @@ export async function createGame(nickname: string, avatarId: number, language: s
     category_distribution: categoryDist,
   });
 
-  // ✅ ADDED: Assign questions at game creation using times_played ordering
-  const { error: rpcError } = await supabase.rpc("assign_game_questions", {
-    p_game_id: game.id,
-    p_language: language,
-    p_question_count: questionsPerGame,
-  });
-  if (rpcError) throw new Error("Could not assign questions");
-
   const { data: player, error: playerErr } = await supabase
     .from("players")
     .insert({
