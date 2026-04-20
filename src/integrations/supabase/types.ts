@@ -312,6 +312,10 @@ export type Database = {
         Args: { p_player_id: string; p_points: number }
         Returns: undefined
       }
+      session_in_game: {
+        Args: { p_game_id: string; p_session_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
