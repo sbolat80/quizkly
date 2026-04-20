@@ -129,8 +129,7 @@ const WaitingRoom = () => {
 
           {/* Question language descriptor */}
           {game?.language && (
-            <div className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-full bg-muted/50 border border-border">
-              <FlagIcon country={game.language === 'tr' ? 'tr' : 'gb'} className="w-5 h-4" />
+            <div className="w-full flex items-center justify-center px-3 py-2 rounded-full bg-muted/50 border border-border">
               <span className="text-xs font-semibold text-foreground">
                 {t('questionsWillBeIn').replace(
                   '{lang}',
