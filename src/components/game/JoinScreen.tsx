@@ -162,7 +162,7 @@ const JoinScreen = ({ initialCode }: { initialCode?: string }) => {
             onClick={handleJoin}
           >
             <LogIn className="w-5 h-5" />
-            {loading ? t('checkingRoom') : t('joinRoom')}
+            {loading ? t('joiningRoom') : t('joinRoom')}
           </Button>
         </div>
       </div>
