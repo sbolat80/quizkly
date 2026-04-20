@@ -2,114 +2,31 @@ import { supabase } from "@/integrations/supabase/client";
 import { getSessionId } from "@/lib/session";
 import gameConfig from "@/config/gameConfig";
 
-// Fisher-Yates shuffle
-function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-function buildCategoryDistribution(categories: string[], needed: number): Record<string, number> {
-  const shuffled = shuffle(categories);
-  console.log("Random category order:", shuffled);
-  const dist: Record<string, number> = {};
-  for (const cat of shuffled) dist[cat] = 0;
-  let remaining = needed;
-  let catIdx = 0;
-  while (remaining > 0) {
-    dist[shuffled[catIdx % shuffled.length]]++;
-    remaining--;
-    catIdx++;
-  }
-  console.log(
-    "Category distribution:",
-    dist,
-    "Total:",
-    Object.values(dist).reduce((a, b) => a + b, 0),
-  );
-  return dist;
-}
-
 export async function createGame(nickname: string, avatarId: number, language: string) {
   const sessionId = getSessionId();
-  const { data: gameCode, error: codeErr } = await supabase.rpc("generate_game_code");
-  if (codeErr || !gameCode) throw new Error("Could not generate game code");
-
-  const { data: game, error: gameErr } = await supabase
-    .from("games")
-    .insert({ game_code: gameCode, language, status: "waiting" })
-    .select()
-    .single();
-  if (gameErr || !game) throw new Error("Could not create game");
-
-  const categories = ["general", "science", "math", "sports", "music"];
-  const questionsPerGame = gameConfig.QUESTIONS_PER_GAME;
-  const categoryDist = buildCategoryDistribution(categories, questionsPerGame);
-
-  await supabase.from("game_settings").insert({
-    game_id: game.id,
-    questions_per_game: questionsPerGame,
-    question_time_seconds: gameConfig.QUESTION_TIME_SECONDS,
-    category_distribution: categoryDist,
-  });
-
-  const { data: player, error: playerErr } = await supabase
-    .from("players")
-    .insert({
-      game_id: game.id,
-      session_id: sessionId,
+  const { data, error } = await supabase.functions.invoke("create-game", {
+    body: {
+      sessionId,
       nickname,
-      avatar_id: avatarId,
-      is_host: true,
-    })
-    .select()
-    .single();
-  if (playerErr || !player) throw new Error("Could not create player");
-
-  await supabase.from("games").update({ host_player_id: player.id }).eq("id", game.id);
-
-  return { game, player };
+      avatarId,
+      language,
+      questionsPerGame: gameConfig.QUESTIONS_PER_GAME,
+      questionTimeSeconds: gameConfig.QUESTION_TIME_SECONDS,
+    },
+  });
+  if (error) throw error;
+  if (data?.error) throw new Error(data.error);
+  return { game: data.game, player: data.player };
 }
 
 export async function joinGame(code: string, nickname: string, avatarId: number) {
   const sessionId = getSessionId();
-
-  const { data: game, error: gameErr } = await supabase
-    .from("games")
-    .select()
-    .eq("game_code", code.toUpperCase())
-    .single();
-  if (gameErr || !game) throw new Error("Game not found");
-  if (game.status !== "waiting") throw new Error("Game already started");
-
-  const { data: existingPlayers } = await supabase
-    .from("players")
-    .select("id, session_id")
-    .eq("game_id", game.id)
-    .eq("is_active", true);
-
-  if ((existingPlayers?.length ?? 0) >= 8) throw new Error("Game is full");
-
-  const existing = existingPlayers?.find((p) => p.session_id === sessionId);
-  if (existing) return { game, player: existing };
-
-  const { data: player, error: playerErr } = await supabase
-    .from("players")
-    .insert({
-      game_id: game.id,
-      session_id: sessionId,
-      nickname,
-      avatar_id: avatarId,
-      is_host: false,
-    })
-    .select()
-    .single();
-  if (playerErr || !player) throw new Error("Could not join game");
-
-  return { game, player };
+  const { data, error } = await supabase.functions.invoke("join-game", {
+    body: { sessionId, code, nickname, avatarId },
+  });
+  if (error) throw error;
+  if (data?.error) throw new Error(data.error);
+  return { game: data.game, player: data.player };
 }
 
 export async function getGamePlayers(gameId: string) {
@@ -143,8 +60,9 @@ export async function getGameSettings(gameId: string) {
 }
 
 export async function startGame(gameId: string, language: string) {
+  const sessionId = getSessionId();
   const { data, error } = await supabase.functions.invoke("start-game", {
-    body: { gameId, language },
+    body: { gameId, language, sessionId },
   });
   if (error) throw error;
   if (data?.error) throw new Error(data.error);
@@ -185,9 +103,11 @@ export async function advancePhase(
     expected_phase_started_at?: string;
   },
 ) {
+  const sessionId = getSessionId();
   const { data, error } = await supabase.functions.invoke("advance-phase", {
     body: {
       gameId,
+      sessionId,
       question_time_ms: config?.question_time_ms ?? gameConfig.QUESTION_TIME_SECONDS * 1000,
       result_phase_ms: config?.result_phase_ms ?? gameConfig.RESULT_PHASE_MS,
       leaderboard_ms: config?.leaderboard_ms ?? gameConfig.LEADERBOARD_PHASE_MS,
@@ -200,20 +120,12 @@ export async function advancePhase(
 }
 
 export async function resetGame(gameId: string) {
-  await supabase.from("answers").delete().eq("game_id", gameId);
-  await supabase.from("game_questions").delete().eq("game_id", gameId);
-  await supabase.from("players").update({ score: 0 }).eq("game_id", gameId);
-  await supabase
-    .from("games")
-    .update({
-      status: "waiting",
-      phase: null,
-      phase_started_at: null,
-      current_question_index: 0,
-      started_at: null,
-      finished_at: null,
-    })
-    .eq("id", gameId);
+  const sessionId = getSessionId();
+  const { data, error } = await supabase.functions.invoke("reset-game", {
+    body: { gameId, sessionId },
+  });
+  if (error) throw error;
+  if (data?.error) throw new Error(data.error);
 }
 
 export function subscribeToGame(gameId: string, callback: (game: any) => void) {
