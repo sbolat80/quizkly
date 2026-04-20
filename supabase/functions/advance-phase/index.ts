@@ -17,10 +17,10 @@ Deno.serve(async (req) => {
     )
 
     const body = await req.json()
-    const { gameId, expected_phase, expected_phase_started_at } = body
+    const { gameId, sessionId, expected_phase, expected_phase_started_at } = body
 
-    if (!gameId) {
-      return new Response(JSON.stringify({ error: 'gameId required' }), {
+    if (!gameId || !sessionId) {
+      return new Response(JSON.stringify({ error: 'Missing required fields' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
@@ -35,6 +35,22 @@ Deno.serve(async (req) => {
     if (gameErr || !game) {
       return new Response(JSON.stringify({ error: 'Game not found' }), {
         status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // Verify caller is an active player in this game (any player can advance phases — clients race idempotently)
+    const { data: callerPlayer } = await supabase
+      .from('players')
+      .select('id, is_active')
+      .eq('game_id', gameId)
+      .eq('session_id', sessionId)
+      .eq('is_active', true)
+      .maybeSingle()
+
+    if (!callerPlayer) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
@@ -183,8 +199,9 @@ Deno.serve(async (req) => {
     })
 
   } catch (e) {
-    console.error('advance-phase error:', e)
-    return new Response(JSON.stringify({ error: e.message }), {
+    const ref = crypto.randomUUID()
+    console.error(`[${ref}] advance-phase error:`, e)
+    return new Response(JSON.stringify({ error: 'Internal server error', ref }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
