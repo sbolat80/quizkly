@@ -338,9 +338,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     try {
       const gameLanguage = game.language || 'en';
       await gameService.startGame(game.id, gameLanguage);
+      // Keep loading=true on success: the realtime phase update will unmount
+      // WaitingRoom shortly. Resetting loading here would briefly re-enable the
+      // "Start Game" button between the response and the phase change.
     } catch (e: any) {
       toast.error(e.message || 'Failed to start game');
-    } finally {
       store.setLoading(false);
     }
   }, [store]);
