@@ -11,6 +11,7 @@ import { getSessionId } from '@/lib/session';
 import { playPlayerJoin } from '@/lib/sounds';
 import * as gameService from '@/services/gameService';
 import { toast } from 'sonner';
+import FlagIcon from '@/components/ui/FlagIcon';
 
 const WaitingRoom = () => {
   const { t } = useI18n();
