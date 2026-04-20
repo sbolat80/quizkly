@@ -7,7 +7,7 @@ import { useI18n } from '@/i18n';
 import { useGameStore } from '@/stores/gameStore';
 import { useGame } from '@/context/GameContext';
 import { avatars } from '@/data/avatars';
-import { getSessionId } from '@/lib/session';
+
 import { playPlayerJoin } from '@/lib/sounds';
 import * as gameService from '@/services/gameService';
 import { toast } from 'sonner';
