@@ -134,8 +134,10 @@ Deno.serve(async (req) => {
       .single()
     if (gameErr || !game) throw new Error('Game insert failed')
 
-    const categories = ['general', 'science', 'math', 'sports', 'music']
-    const categoryDist = buildCategoryDistribution(categories, qpg)
+    const pickedCategories = await pickCategoriesForGame(supabase, language, qpg)
+    const fallbackCategories = ['general', 'science', 'math', 'sports', 'music']
+    const categoriesToUse = pickedCategories.length > 0 ? pickedCategories : fallbackCategories
+    const categoryDist = buildCategoryDistribution(categoriesToUse, qpg)
 
     await supabase.from('game_settings').insert({
       game_id: game.id,
