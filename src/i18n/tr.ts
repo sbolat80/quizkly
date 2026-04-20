@@ -9,6 +9,7 @@ const tr = {
   questionLanguage: "Soru Dili",
   enterGameCode: "Oyun kodunu girin",
   joinRoom: "Odaya Katıl",
+  joiningRoom: "Odaya katılıyor...",
   checkingRoom: "Oda kontrol ediliyor...",
   invalidLink: "Geçersiz link",
   gameEnded: "Oyun bitti",
