@@ -141,8 +141,8 @@ const WaitingRoom = () => {
                 {t('players')} ({players.length})
               </h3>
               {game?.language && (
-                <span className="text-xs text-muted-foreground">
-                  {game.language === 'tr' ? '🇹🇷' : '🇬🇧'}{' '}
+                <span className="text-xs text-muted-foreground inline-flex items-center gap-1.5">
+                  <FlagIcon country={game.language === 'tr' ? 'tr' : 'gb'} className="w-4 h-3" />
                   {game.language === 'tr' ? t('langTurkish') : t('langEnglish')}
                 </span>
               )}
