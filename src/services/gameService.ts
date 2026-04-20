@@ -32,7 +32,7 @@ export async function joinGame(code: string, nickname: string, avatarId: number)
 export async function getGamePlayers(gameId: string) {
   const { data, error } = await supabase
     .from("players")
-    .select()
+    .select("id, game_id, nickname, avatar_id, score, is_host, is_active, joined_at")
     .eq("game_id", gameId)
     .eq("is_active", true)
     .order("joined_at", { ascending: true });
