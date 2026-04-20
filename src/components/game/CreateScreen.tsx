@@ -108,7 +108,7 @@ const CreateScreen = () => {
             onClick={handleCreate}
           >
             <Sparkles className="w-5 h-5" />
-            {loading ? t('starting') : t('createRoom')}
+            {loading ? t('creatingRoom') : t('createRoom')}
           </Button>
         </div>
       </div>

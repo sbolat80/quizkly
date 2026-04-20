@@ -5,6 +5,7 @@ const tr = {
   back: "Geri",
   enterNickname: "Takma adını gir",
   createRoom: "Oda Oluştur",
+  creatingRoom: "Oda oluşturuluyor...",
   questionLanguage: "Soru Dili",
   enterGameCode: "Oyun kodunu girin",
   joinRoom: "Odaya Katıl",
