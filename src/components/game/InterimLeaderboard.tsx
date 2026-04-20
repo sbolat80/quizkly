@@ -26,7 +26,10 @@ const InterimLeaderboard = () => {
 
   const sorted = [...players].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
   const totalQuestions = questions.length;
-  const isLastQuestion = currentQuestionIndex + 1 >= totalQuestions;
+  // Leaderboard shows AFTER question at currentQuestionIndex completes.
+  // Next question will be currentQuestionIndex + 1 (0-based), i.e. question number (currentQuestionIndex + 2).
+  // "Ending soon" only when the NEXT question is the final one.
+  const isNextQuestionLast = currentQuestionIndex + 2 >= totalQuestions;
 
   const soundPlayed = useRef(false);
   useEffect(() => {
@@ -103,7 +106,7 @@ const InterimLeaderboard = () => {
       </div>
 
       <p className="mt-6 pb-4 text-sm text-muted-foreground">
-        {isLastQuestion ? t('gameEndingSoon') : t('nextQuestionComing')}
+        {isNextQuestionLast ? t('gameEndingSoon') : t('nextQuestionComing')}
       </p>
     </motion.div>
   );
