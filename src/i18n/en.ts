@@ -9,6 +9,7 @@ const en = {
   questionLanguage: "Question Language",
   enterGameCode: "Enter game code",
   joinRoom: "Join Room",
+  joiningRoom: "Joining room...",
   checkingRoom: "Checking room...",
   invalidLink: "Invalid link",
   gameEnded: "Game has ended",
