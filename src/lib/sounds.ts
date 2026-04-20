@@ -67,6 +67,7 @@ interface ToneOpts {
 }
 
 function playTone(opts: ToneOpts) {
+  if (isMuted) return;
   const ctx = getCtx();
   const t0 = ctx.currentTime + (opts.delay ?? 0);
   const dur = opts.duration;
