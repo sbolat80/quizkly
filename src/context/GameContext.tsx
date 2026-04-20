@@ -274,8 +274,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     playerSubRef.current = gameService.subscribeToPlayers(gameId, (updatedPlayers) => {
       const s = useGameStore.getState();
       s.setPlayers(updatedPlayers);
-      const sessionId = getSessionId();
-      const me = updatedPlayers.find((p: any) => p.session_id === sessionId);
+      const currentId = s.currentPlayer?.id;
+      const me = currentId ? updatedPlayers.find((p: any) => p.id === currentId) : undefined;
       if (me) {
         const prev = s.currentPlayer;
         s.setCurrentPlayer(prev ? {
