@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
-import { Zap, Users, Sun, Moon } from "lucide-react";
+import { Zap, Users, Sun, Moon, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n";
 import { useGameStore } from "@/stores/gameStore";
 import { useTheme } from "@/hooks/use-theme";
+import { useSoundMute } from "@/hooks/use-sound-mute";
 import QuizklyLogo from "@/assets/quizkly-logo.png";
 import FlagIcon from "@/components/ui/FlagIcon";
 
@@ -11,6 +12,7 @@ const HomeScreen = () => {
   const { t, lang, setLang } = useI18n();
   const setScreen = useGameStore((s) => s.setScreen);
   const { theme, toggleTheme } = useTheme();
+  const { muted, toggle: toggleMute } = useSoundMute();
 
   const toggleLang = () => setLang(lang === "en" ? "tr" : "en");
 
