@@ -7,7 +7,7 @@ import { useI18n } from '@/i18n';
 import { useGameStore } from '@/stores/gameStore';
 import { useGame } from '@/context/GameContext';
 import { avatars } from '@/data/avatars';
-import { getSessionId } from '@/lib/session';
+
 import { playPlayerJoin } from '@/lib/sounds';
 import * as gameService from '@/services/gameService';
 import { toast } from 'sonner';
@@ -22,7 +22,7 @@ const WaitingRoom = () => {
   const loading = useGameStore((s) => s.loading);
 
   const prevCountRef = useRef(players.length);
-  const sessionId = getSessionId();
+  const currentPlayerId = currentPlayer?.id;
 
   const isHost = currentPlayer?.is_host === true;
   const gameCode = game?.game_code ?? '';
@@ -69,7 +69,7 @@ const WaitingRoom = () => {
     return avatars.find((a) => a.id === avatarId)?.image ?? avatars[0].image;
   };
 
-  const otherPlayers = players.filter((p) => p.session_id !== sessionId);
+  const otherPlayers = players.filter((p) => p.id !== currentPlayerId);
 
   return (
     <motion.div
@@ -151,7 +151,7 @@ const WaitingRoom = () => {
             <div className="space-y-2">
               <AnimatePresence>
                 {players.map((player, index) => {
-                  const isSelf = player.session_id === sessionId;
+                  const isSelf = player.id === currentPlayerId;
                   return (
                     <motion.div
                       key={player.id}
