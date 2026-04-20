@@ -65,6 +65,7 @@ const tr = {
   avatar8: "Pıtırcık",
   soundOn: "Ses açık",
   soundOff: "Ses kapalı",
+  questionsWillBeIn: "Sorular {lang} dilinde olacak",
 } as const;
 
 export default tr;

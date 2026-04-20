@@ -94,45 +94,51 @@ const WaitingRoom = () => {
         </div>
 
         {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto flex flex-col items-center gap-5 pt-2 pb-4 overflow-x-hidden">
-          {/* Game Code label */}
-          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-            {t('gameCode')}
-          </span>
-
-          {/* Game Code + QR side by side */}
-          <div className="flex items-center justify-center gap-4 w-full">
-            {/* Code box */}
-            <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
+        <div className="flex-1 overflow-y-auto flex flex-col items-center gap-3 pt-2 pb-4 overflow-x-hidden">
+          {/* Game Code + QR compact two-column area */}
+          <div className="flex items-stretch justify-center gap-3 w-full">
+            {/* Left column: code + share */}
+            <div className="flex flex-col gap-2 flex-1 min-w-0">
               <button
                 onClick={copyCode}
-                className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-primary text-primary-foreground transition-transform active:scale-95 w-full justify-center"
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-primary text-primary-foreground transition-transform active:scale-95 w-full justify-center"
               >
-                <span className="text-2xl font-black tracking-[0.2em]">{gameCode}</span>
+                <span className="text-2xl font-black tracking-[0.2em] truncate">{gameCode}</span>
                 <Copy className="w-5 h-5 opacity-70 shrink-0" />
               </button>
-              <span className="text-xs text-muted-foreground">{t('tapToCopy')}</span>
+              <span className="text-xs text-muted-foreground text-center -mt-1">{t('tapToCopy')}</span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-full gap-2 border-primary/30 text-primary w-full"
+                onClick={shareLink}
+              >
+                <Share2 className="w-4 h-4" />
+                {t('shareJoinLink')}
+              </Button>
             </div>
 
-            {/* QR Code */}
+            {/* Right column: QR */}
             <div className="flex flex-col items-center shrink-0">
               <div className="bg-white p-2 rounded-xl shadow-sm overflow-hidden">
-                <QRCodeSVG value={joinUrl} size={90} />
+                <QRCodeSVG value={joinUrl} size={96} />
               </div>
               <span className="text-[10px] text-muted-foreground mt-1">{t('scanToJoin')}</span>
             </div>
           </div>
 
-          {/* Share Link Button */}
-          <Button
-            variant="outline"
-            size="sm"
-            className="rounded-full gap-2 border-primary/30 text-primary"
-            onClick={shareLink}
-          >
-            <Share2 className="w-4 h-4" />
-            {t('shareJoinLink')}
-          </Button>
+          {/* Question language descriptor */}
+          {game?.language && (
+            <div className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-full bg-muted/50 border border-border">
+              <FlagIcon country={game.language === 'tr' ? 'tr' : 'gb'} className="w-5 h-4" />
+              <span className="text-xs font-semibold text-foreground">
+                {t('questionsWillBeIn').replace(
+                  '{lang}',
+                  game.language === 'tr' ? t('langTurkish') : t('langEnglish')
+                )}
+              </span>
+            </div>
+          )}
 
           {/* Players List */}
           <div className="w-full space-y-3">
@@ -140,12 +146,6 @@ const WaitingRoom = () => {
               <h3 className="text-sm font-bold text-foreground">
                 {t('players')} ({players.length})
               </h3>
-              {game?.language && (
-                <span className="text-xs text-muted-foreground inline-flex items-center gap-1.5">
-                  <FlagIcon country={game.language === 'tr' ? 'tr' : 'gb'} className="w-4 h-3" />
-                  {game.language === 'tr' ? t('langTurkish') : t('langEnglish')}
-                </span>
-              )}
             </div>
 
             <div className="space-y-2">

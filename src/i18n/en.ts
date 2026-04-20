@@ -65,6 +65,7 @@ const en = {
   avatar8: "Lovey",
   soundOn: "Sound on",
   soundOff: "Sound off",
+  questionsWillBeIn: "Questions will be in {lang}",
 } as const;
 
 export type TranslationKeys = keyof typeof en;
