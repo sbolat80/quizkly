@@ -63,6 +63,8 @@ const en = {
   avatar6: "Fuzzy",
   avatar7: "Munchie",
   avatar8: "Lovey",
+  soundOn: "Sound on",
+  soundOff: "Sound off",
 } as const;
 
 export type TranslationKeys = keyof typeof en;
