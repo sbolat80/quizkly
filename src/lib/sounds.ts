@@ -107,6 +107,7 @@ function playTone(opts: ToneOpts) {
 
 /** Short noise burst – good for "pop", "bonk", percussion. */
 function playNoise(duration: number, gain = 0.1, filterFreq = 1000, delay = 0) {
+  if (isMuted) return;
   const ctx = getCtx();
   const t0 = ctx.currentTime + delay;
   const bufferSize = Math.floor(ctx.sampleRate * duration);
