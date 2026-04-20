@@ -40,25 +40,38 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
-    const { gameId, language } = await req.json()
+    const { gameId, language, sessionId } = await req.json()
 
-    if (!gameId || !language) {
-      return new Response(JSON.stringify({ error: 'Missing gameId or language' }), {
+    if (!gameId || !language || !sessionId) {
+      return new Response(JSON.stringify({ error: 'Missing required fields' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    // Verify game is in waiting state
+    // Verify game exists and caller is the host
     const { data: game, error: gameErr } = await supabase
       .from('games')
-      .select('status')
+      .select('status, host_player_id')
       .eq('id', gameId)
       .single()
 
     if (gameErr || !game) {
       return new Response(JSON.stringify({ error: 'Game not found' }), {
         status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    const { data: hostPlayer } = await supabase
+      .from('players')
+      .select('id, session_id')
+      .eq('id', game.host_player_id)
+      .maybeSingle()
+
+    if (!hostPlayer || hostPlayer.session_id !== sessionId) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
@@ -237,8 +250,9 @@ Deno.serve(async (req) => {
     })
 
   } catch (e) {
-    console.error('start-game error:', e)
-    return new Response(JSON.stringify({ error: e.message }), {
+    const ref = crypto.randomUUID()
+    console.error(`[${ref}] start-game error:`, e)
+    return new Response(JSON.stringify({ error: 'Internal server error', ref }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })

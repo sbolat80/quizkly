@@ -25,13 +25,37 @@ Deno.serve(async (req) => {
       })
     }
 
+    if (typeof submittedAnswer !== 'string' || submittedAnswer.length > 500) {
+      return new Response(JSON.stringify({ error: 'Invalid answer' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // Verify session matches the player's recorded session and player belongs to game
+    const { data: player, error: playerErr } = await supabase
+      .from('players')
+      .select('id, session_id, game_id')
+      .eq('id', playerId)
+      .maybeSingle()
+
+    if (playerErr || !player || player.session_id !== sessionId || player.game_id !== gameId) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // Use the DB-fetched id from this point forward
+    const verifiedPlayerId = player.id
+
     // Check for duplicate answer
     const { data: existing } = await supabase
       .from('answers')
       .select('id')
       .eq('game_id', gameId)
       .eq('question_id', questionId)
-      .eq('player_id', playerId)
+      .eq('player_id', verifiedPlayerId)
       .maybeSingle()
 
     if (existing) {
@@ -69,18 +93,16 @@ Deno.serve(async (req) => {
     const questionTimeSeconds = settings?.question_time_seconds ?? 15
     const questionTimeMs = questionTimeSeconds * 1000
 
-    // Calculate points: base 1000, minus time penalty proportional to actual question duration
     let pointsAwarded = 0
     if (isCorrect) {
       const timeFactor = Math.max(0, 1 - (responseTimeMs || 0) / questionTimeMs)
       pointsAwarded = Math.round(500 + 500 * timeFactor)
     }
 
-    // Insert answer
     await supabase.from('answers').insert({
       game_id: gameId,
       question_id: questionId,
-      player_id: playerId,
+      player_id: verifiedPlayerId,
       session_id: sessionId,
       submitted_answer: submittedAnswer,
       response_time_ms: responseTimeMs ?? 0,
@@ -88,10 +110,9 @@ Deno.serve(async (req) => {
       points_awarded: pointsAwarded,
     })
 
-    // Update player score
     if (pointsAwarded > 0) {
       await supabase.rpc('increment_player_score', {
-        p_player_id: playerId,
+        p_player_id: verifiedPlayerId,
         p_points: pointsAwarded,
       })
     }
@@ -106,8 +127,9 @@ Deno.serve(async (req) => {
     })
 
   } catch (e) {
-    console.error('submit-answer error:', e)
-    return new Response(JSON.stringify({ error: e.message }), {
+    const ref = crypto.randomUUID()
+    console.error(`[${ref}] submit-answer error:`, e)
+    return new Response(JSON.stringify({ error: 'Internal server error', ref }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
