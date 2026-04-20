@@ -5,6 +5,7 @@ const en = {
   back: "Back",
   enterNickname: "Enter your nickname",
   createRoom: "Create Room",
+  creatingRoom: "Creating room...",
   questionLanguage: "Question Language",
   enterGameCode: "Enter game code",
   joinRoom: "Join Room",
