@@ -40,6 +40,22 @@ const HomeScreen = () => {
           </button>
           <div className="w-px h-4 mx-2 bg-black/[0.12] dark:bg-white/20" />
           <button
+            onClick={toggleMute}
+            className="flex items-center justify-center w-7 h-7 rounded-full transition-colors"
+            aria-label={muted ? t("soundOff") : t("soundOn")}
+            aria-pressed={muted}
+            title={muted ? t("soundOff") : t("soundOn")}
+          >
+            {muted ? (
+              <VolumeX className="w-4 h-4 text-foreground/60" />
+            ) : theme === "dark" ? (
+              <Volume2 className="w-4 h-4 text-white/70" />
+            ) : (
+              <Volume2 className="w-4 h-4" style={{ color: "#4C1D95" }} />
+            )}
+          </button>
+          <div className="w-px h-4 mx-2 bg-black/[0.12] dark:bg-white/20" />
+          <button
             onClick={toggleLang}
             className="flex items-center gap-1.5 text-sm font-bold transition-colors text-foreground/70 hover:text-foreground"
           >
