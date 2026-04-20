@@ -28,6 +28,58 @@ function buildCategoryDistribution(categories: string[], needed: number): Record
   return dist
 }
 
+// Pick N distinct categories from the pool, prioritizing least-played categories.
+// If pool has fewer than N distinct categories, returns all available (caller round-robins).
+async function pickCategoriesForGame(
+  supabase: ReturnType<typeof createClient>,
+  language: string,
+  needed: number,
+): Promise<string[]> {
+  const { data: questions, error } = await supabase
+    .from('questions')
+    .select('category, times_played, last_played_at')
+    .eq('is_active', true)
+    .eq('language', language)
+
+  if (error || !questions || questions.length === 0) return []
+
+  // Aggregate per-category stats: total times_played and most recent last_played_at
+  const stats = new Map<string, { totalPlayed: number; lastPlayed: number; count: number }>()
+  for (const q of questions) {
+    const cat = q.category as string
+    const tp = (q.times_played as number | null) ?? 0
+    const lp = q.last_played_at ? new Date(q.last_played_at as string).getTime() : -Infinity
+    const cur = stats.get(cat)
+    if (!cur) {
+      stats.set(cat, { totalPlayed: tp, lastPlayed: lp, count: 1 })
+    } else {
+      cur.totalPlayed += tp
+      cur.count += 1
+      if (lp > cur.lastPlayed) cur.lastPlayed = lp
+    }
+  }
+
+  // Average plays per category (so categories with few questions aren't unfairly penalized)
+  const ranked = Array.from(stats.entries())
+    .map(([cat, s]) => ({
+      cat,
+      avgPlayed: s.totalPlayed / s.count,
+      lastPlayed: s.lastPlayed,
+      r: Math.random(),
+    }))
+    .sort((a, b) => {
+      if (a.avgPlayed !== b.avgPlayed) return a.avgPlayed - b.avgPlayed
+      if (a.lastPlayed !== b.lastPlayed) return a.lastPlayed - b.lastPlayed
+      return a.r - b.r
+    })
+
+  // Take top least-played candidates (2x needed for randomness pool), then randomly pick N
+  const poolSize = Math.min(ranked.length, Math.max(needed * 2, needed))
+  const candidatePool = ranked.slice(0, poolSize).map((x) => x.cat)
+  const randomized = shuffle(candidatePool)
+  return randomized.slice(0, Math.min(needed, randomized.length))
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -82,8 +134,10 @@ Deno.serve(async (req) => {
       .single()
     if (gameErr || !game) throw new Error('Game insert failed')
 
-    const categories = ['general', 'science', 'math', 'sports', 'music']
-    const categoryDist = buildCategoryDistribution(categories, qpg)
+    const pickedCategories = await pickCategoriesForGame(supabase, language, qpg)
+    const fallbackCategories = ['general', 'science', 'math', 'sports', 'music']
+    const categoriesToUse = pickedCategories.length > 0 ? pickedCategories : fallbackCategories
+    const categoryDist = buildCategoryDistribution(categoriesToUse, qpg)
 
     await supabase.from('game_settings').insert({
       game_id: game.id,
