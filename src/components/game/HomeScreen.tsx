@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
-import { Zap, Users, Sun, Moon } from "lucide-react";
+import { Zap, Users, Sun, Moon, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n";
 import { useGameStore } from "@/stores/gameStore";
 import { useTheme } from "@/hooks/use-theme";
+import { useSoundMute } from "@/hooks/use-sound-mute";
 import QuizklyLogo from "@/assets/quizkly-logo.png";
 import FlagIcon from "@/components/ui/FlagIcon";
 
@@ -11,6 +12,7 @@ const HomeScreen = () => {
   const { t, lang, setLang } = useI18n();
   const setScreen = useGameStore((s) => s.setScreen);
   const { theme, toggleTheme } = useTheme();
+  const { muted, toggle: toggleMute } = useSoundMute();
 
   const toggleLang = () => setLang(lang === "en" ? "tr" : "en");
 
@@ -34,6 +36,22 @@ const HomeScreen = () => {
               <Sun className="w-4 h-4 text-white/70" />
             ) : (
               <Moon className="w-4 h-4" style={{ color: "#4C1D95" }} />
+            )}
+          </button>
+          <div className="w-px h-4 mx-2 bg-black/[0.12] dark:bg-white/20" />
+          <button
+            onClick={toggleMute}
+            className="flex items-center justify-center w-7 h-7 rounded-full transition-colors"
+            aria-label={muted ? t("soundOff") : t("soundOn")}
+            aria-pressed={muted}
+            title={muted ? t("soundOff") : t("soundOn")}
+          >
+            {muted ? (
+              <VolumeX className="w-4 h-4 text-foreground/60" />
+            ) : theme === "dark" ? (
+              <Volume2 className="w-4 h-4 text-white/70" />
+            ) : (
+              <Volume2 className="w-4 h-4" style={{ color: "#4C1D95" }} />
             )}
           </button>
           <div className="w-px h-4 mx-2 bg-black/[0.12] dark:bg-white/20" />

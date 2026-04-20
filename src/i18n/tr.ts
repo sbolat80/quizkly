@@ -63,6 +63,8 @@ const tr = {
   avatar6: "Şaşkın",
   avatar7: "Oburcuk",
   avatar8: "Pıtırcık",
+  soundOn: "Ses açık",
+  soundOff: "Ses kapalı",
 } as const;
 
 export default tr;

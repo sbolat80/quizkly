@@ -1,5 +1,47 @@
 let audioCtx: AudioContext | null = null;
 
+// ============= Mute state (persisted in localStorage) =============
+const MUTE_STORAGE_KEY = 'quizkly_sound_muted';
+const muteListeners = new Set<(muted: boolean) => void>();
+
+function readMuted(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return window.localStorage.getItem(MUTE_STORAGE_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+let isMuted = readMuted();
+
+export function isSoundMuted(): boolean {
+  return isMuted;
+}
+
+export function setSoundMuted(muted: boolean): void {
+  isMuted = muted;
+  try {
+    window.localStorage.setItem(MUTE_STORAGE_KEY, muted ? '1' : '0');
+  } catch {
+    /* ignore quota / private mode errors */
+  }
+  muteListeners.forEach((cb) => cb(muted));
+}
+
+export function toggleSoundMuted(): boolean {
+  setSoundMuted(!isMuted);
+  return isMuted;
+}
+
+/** Subscribe to mute changes. Returns an unsubscribe function. */
+export function subscribeSoundMuted(cb: (muted: boolean) => void): () => void {
+  muteListeners.add(cb);
+  return () => {
+    muteListeners.delete(cb);
+  };
+}
+
 function getCtx(): AudioContext {
   if (!audioCtx) audioCtx = new AudioContext();
   // Resume if suspended (browser autoplay policy)
@@ -25,6 +67,7 @@ interface ToneOpts {
 }
 
 function playTone(opts: ToneOpts) {
+  if (isMuted) return;
   const ctx = getCtx();
   const t0 = ctx.currentTime + (opts.delay ?? 0);
   const dur = opts.duration;
@@ -64,6 +107,7 @@ function playTone(opts: ToneOpts) {
 
 /** Short noise burst – good for "pop", "bonk", percussion. */
 function playNoise(duration: number, gain = 0.1, filterFreq = 1000, delay = 0) {
+  if (isMuted) return;
   const ctx = getCtx();
   const t0 = ctx.currentTime + delay;
   const bufferSize = Math.floor(ctx.sampleRate * duration);
