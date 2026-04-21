@@ -1,105 +1,121 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
-}
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
 
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    )
+    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
-    const { gameId, questionId, playerId, sessionId, submittedAnswer, responseTimeMs } = await req.json()
+    const { gameId, questionId, playerId, sessionId, submittedAnswer, responseTimeMs } = await req.json();
 
     if (!gameId || !questionId || !playerId || !sessionId || submittedAnswer == null) {
-      return new Response(JSON.stringify({ error: 'Missing required fields' }), {
+      return new Response(JSON.stringify({ error: "Missing required fields" }), {
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    if (typeof submittedAnswer !== 'string' || submittedAnswer.length > 500) {
-      return new Response(JSON.stringify({ error: 'Invalid answer' }), {
+    if (typeof submittedAnswer !== "string" || submittedAnswer.length > 500) {
+      return new Response(JSON.stringify({ error: "Invalid answer" }), {
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Verify session matches the player's recorded session and player belongs to game
     const { data: player, error: playerErr } = await supabase
-      .from('players')
-      .select('id, session_id, game_id')
-      .eq('id', playerId)
-      .maybeSingle()
+      .from("players")
+      .select("id, session_id, game_id")
+      .eq("id", playerId)
+      .maybeSingle();
 
     if (playerErr || !player || player.session_id !== sessionId || player.game_id !== gameId) {
-      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
         status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Use the DB-fetched id from this point forward
-    const verifiedPlayerId = player.id
+    const verifiedPlayerId = player.id;
 
     // Check for duplicate answer
     const { data: existing } = await supabase
-      .from('answers')
-      .select('id')
-      .eq('game_id', gameId)
-      .eq('question_id', questionId)
-      .eq('player_id', verifiedPlayerId)
-      .maybeSingle()
+      .from("answers")
+      .select("id")
+      .eq("game_id", gameId)
+      .eq("question_id", questionId)
+      .eq("player_id", verifiedPlayerId)
+      .maybeSingle();
 
     if (existing) {
-      return new Response(JSON.stringify({ error: 'Already answered', is_correct: false, points_awarded: 0, correct_index: -1 }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+      return new Response(
+        JSON.stringify({ error: "Already answered", is_correct: false, points_awarded: 0, correct_index: -1 }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     // Get question
     const { data: question, error: qErr } = await supabase
-      .from('questions')
-      .select('correct_answer, options')
-      .eq('id', questionId)
-      .single()
+      .from("questions")
+      .select("correct_answer, options")
+      .eq("id", questionId)
+      .single();
 
     if (qErr || !question) {
-      return new Response(JSON.stringify({ error: 'Question not found' }), {
+      return new Response(JSON.stringify({ error: "Question not found" }), {
         status: 404,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    const options = Array.isArray(question.options) ? question.options : JSON.parse(question.options as string)
-    const correctAnswer = question.correct_answer
-    const isCorrect = submittedAnswer === correctAnswer
-    const correctIndex = options.indexOf(correctAnswer)
+    const options = Array.isArray(question.options) ? question.options : JSON.parse(question.options as string);
+    const correctAnswer = question.correct_answer;
+    const isCorrect = submittedAnswer === correctAnswer;
+    const correctIndex = options.indexOf(correctAnswer);
 
     // Read question_time_seconds from game_settings
     const { data: settings } = await supabase
-      .from('game_settings')
-      .select('question_time_seconds')
-      .eq('game_id', gameId)
-      .maybeSingle()
+      .from("game_settings")
+      .select("question_time_seconds")
+      .eq("game_id", gameId)
+      .maybeSingle();
 
-    const questionTimeSeconds = settings?.question_time_seconds ?? 15
-    const questionTimeMs = questionTimeSeconds * 1000
+    const questionTimeSeconds = settings?.question_time_seconds ?? 15;
+    const questionTimeMs = questionTimeSeconds * 1000;
 
-    let pointsAwarded = 0
+    let pointsAwarded = 0;
     if (isCorrect) {
-      const timeFactor = Math.max(0, 1 - (responseTimeMs || 0) / questionTimeMs)
-      pointsAwarded = Math.round(500 + 500 * timeFactor)
+      const elapsedMs = Math.max(0, responseTimeMs || 0);
+      const totalMs = Math.max(1, questionTimeMs); // safety against divide-by-zero
+      const progress = Math.min(elapsedMs / totalMs, 1);
+
+      if (progress <= 0.2) {
+        // 0% -> 20% elapsed : 1000 -> 960
+        const localProgress = progress / 0.2;
+        pointsAwarded = Math.round(1000 - localProgress * 40);
+      } else if (progress <= 0.5) {
+        // 20% -> 50% elapsed : 960 -> 825
+        const localProgress = (progress - 0.2) / 0.3;
+        pointsAwarded = Math.round(960 - localProgress * 135);
+      } else {
+        // 50% -> 100% elapsed : 825 -> 500
+        const localProgress = (progress - 0.5) / 0.5;
+        pointsAwarded = Math.round(825 - localProgress * 325);
+      }
     }
 
-    await supabase.from('answers').insert({
+    await supabase.from("answers").insert({
       game_id: gameId,
       question_id: questionId,
       player_id: verifiedPlayerId,
@@ -108,30 +124,32 @@ Deno.serve(async (req) => {
       response_time_ms: responseTimeMs ?? 0,
       is_correct: isCorrect,
       points_awarded: pointsAwarded,
-    })
+    });
 
     if (pointsAwarded > 0) {
-      await supabase.rpc('increment_player_score', {
+      await supabase.rpc("increment_player_score", {
         p_player_id: verifiedPlayerId,
         p_points: pointsAwarded,
-      })
+      });
     }
 
-    return new Response(JSON.stringify({
-      is_correct: isCorrect,
-      points_awarded: pointsAwarded,
-      correct_index: correctIndex,
-      question_time_seconds: questionTimeSeconds,
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
-
+    return new Response(
+      JSON.stringify({
+        is_correct: isCorrect,
+        points_awarded: pointsAwarded,
+        correct_index: correctIndex,
+        question_time_seconds: questionTimeSeconds,
+      }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   } catch (e) {
-    const ref = crypto.randomUUID()
-    console.error(`[${ref}] submit-answer error:`, e)
-    return new Response(JSON.stringify({ error: 'Internal server error', ref }), {
+    const ref = crypto.randomUUID();
+    console.error(`[${ref}] submit-answer error:`, e);
+    return new Response(JSON.stringify({ error: "Internal server error", ref }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
-})
+});
