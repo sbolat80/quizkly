@@ -5,7 +5,7 @@
 const gameConfig = {
   QUESTION_TIME_SECONDS: 10, // fallback (test: 7, prod: 10)
   QUESTIONS_PER_GAME: 10, // fallback (test: 5, prod: 10)
-  RESULT_PHASE_MS: 2500,
+  RESULT_PHASE_MS: 3000,
   LEADERBOARD_PHASE_MS: 3000,
 } as const;
 
