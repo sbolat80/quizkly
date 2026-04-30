@@ -34,38 +34,49 @@ const ConfettiCanvas = () => {
       'hsl(175,85%,42%)', 'hsl(217,91%,60%)', 'hsl(50,100%,55%)',
     ];
 
-    for (let i = 0; i < 120; i++) {
+    // Burst confetti from the bottom of the screen, shooting upward then falling
+    for (let i = 0; i < 140; i++) {
       particles.current.push({
         x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height - canvas.height,
+        y: canvas.height + Math.random() * 20,
         w: 6 + Math.random() * 6,
         h: 4 + Math.random() * 4,
         color: colors[Math.floor(Math.random() * colors.length)],
-        vx: (Math.random() - 0.5) * 3,
-        vy: 1.5 + Math.random() * 3,
+        vx: (Math.random() - 0.5) * 6,
+        vy: -(8 + Math.random() * 8),
         rot: Math.random() * 360,
         vr: (Math.random() - 0.5) * 8,
-        opacity: 0.8 + Math.random() * 0.2,
+        opacity: 0.9 + Math.random() * 0.1,
       });
     }
 
+    const gravity = 0.35;
+    const startTime = performance.now();
+    const DURATION = 5000;
+
     let raf: number;
-    const draw = () => {
+    const draw = (now: number) => {
+      const elapsed = now - startTime;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const fade = elapsed > DURATION - 800 ? Math.max(0, (DURATION - elapsed) / 800) : 1;
       particles.current.forEach((p) => {
         p.x += p.vx;
         p.y += p.vy;
+        p.vy += gravity;
         p.rot += p.vr;
-        if (p.y > canvas.height + 20) { p.y = -10; p.x = Math.random() * canvas.width; }
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate((p.rot * Math.PI) / 180);
-        ctx.globalAlpha = p.opacity;
+        ctx.globalAlpha = p.opacity * fade;
         ctx.fillStyle = p.color;
         ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
         ctx.restore();
       });
-      raf = requestAnimationFrame(draw);
+      if (elapsed < DURATION) {
+        raf = requestAnimationFrame(draw);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
     };
     raf = requestAnimationFrame(draw);
 
