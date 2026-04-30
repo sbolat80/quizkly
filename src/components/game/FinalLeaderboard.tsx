@@ -1,31 +1,43 @@
-import { useEffect, useRef, useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useGameStore } from '@/stores/gameStore';
-import { useGame } from '@/context/GameContext';
-import { useI18n } from '@/i18n';
-import { Button } from '@/components/ui/button';
-import { Trophy, Home } from 'lucide-react';
-import { playGameOver } from '@/lib/sounds';
-import { getAvatarById } from '@/data/avatars';
-import { useCountUp } from '@/hooks/use-count-up';
+import { useEffect, useRef, useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useGameStore } from "@/stores/gameStore";
+import { useGame } from "@/context/GameContext";
+import { useI18n } from "@/i18n";
+import { Button } from "@/components/ui/button";
+import { Trophy, Home } from "lucide-react";
+import { playGameOver } from "@/lib/sounds";
+import { getAvatarById } from "@/data/avatars";
+import { useCountUp } from "@/hooks/use-count-up";
 
-const medals = ['🥇', '🥈', '🥉'];
+const medals = ["🥇", "🥈", "🥉"];
 
 /* ── Confetti canvas ── */
-const EMIT_DURATION_MS = 5000;
+const EMIT_DURATION_MS = 6000;
 
 const ConfettiCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const particles = useRef<Array<{
-    x: number; y: number; w: number; h: number;
-    color: string; vx: number; vy: number; rot: number; vr: number; opacity: number;
-    restY: number; settled: boolean; stackOffset: number;
-  }>>([]);
+  const particles = useRef<
+    Array<{
+      x: number;
+      y: number;
+      w: number;
+      h: number;
+      color: string;
+      vx: number;
+      vy: number;
+      rot: number;
+      vr: number;
+      opacity: number;
+      restY: number;
+      settled: boolean;
+      stackOffset: number;
+    }>
+  >([]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const resize = () => {
@@ -44,11 +56,15 @@ const ConfettiCanvas = () => {
       }
     };
     resize();
-    window.addEventListener('resize', resize);
+    window.addEventListener("resize", resize);
 
     const colors = [
-      'hsl(263,70%,58%)', 'hsl(330,80%,60%)', 'hsl(38,92%,50%)',
-      'hsl(175,85%,42%)', 'hsl(217,91%,60%)', 'hsl(50,100%,55%)',
+      "hsl(263,70%,58%)",
+      "hsl(330,80%,60%)",
+      "hsl(38,92%,50%)",
+      "hsl(175,85%,42%)",
+      "hsl(217,91%,60%)",
+      "hsl(50,100%,55%)",
     ];
 
     for (let i = 0; i < 120; i++) {
@@ -87,7 +103,9 @@ const ConfettiCanvas = () => {
           p.rot += p.vr;
           if (p.y >= p.restY) {
             p.y = p.restY;
-            p.vx = 0; p.vy = 0; p.vr = 0;
+            p.vx = 0;
+            p.vy = 0;
+            p.vr = 0;
             p.settled = true;
           } else {
             allSettled = false;
@@ -112,15 +130,26 @@ const ConfettiCanvas = () => {
     };
     raf = requestAnimationFrame(draw);
 
-    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize); };
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", resize);
+    };
   }, []);
 
   return <canvas ref={canvasRef} className="pointer-events-none fixed inset-0 z-50" />;
 };
 
 /* ── Animated score that counts from 0 ── */
-const AnimatedScore = ({ score, delay, className, onDone }: {
-  score: number; delay: number; className?: string; onDone?: () => void;
+const AnimatedScore = ({
+  score,
+  delay,
+  className,
+  onDone,
+}: {
+  score: number;
+  delay: number;
+  className?: string;
+  onDone?: () => void;
 }) => {
   const animated = useCountUp(score ?? 0, 1200, delay);
   const doneRef = useRef(false);
@@ -159,7 +188,7 @@ const FinalLeaderboard = () => {
         score: Number.isFinite(Number(player.score)) ? Number(player.score) : 0,
         index,
       }))
-      .sort((a, b) => (b.score - a.score) || (a.index - b.index));
+      .sort((a, b) => b.score - a.score || a.index - b.index);
 
     let lastScore: number | null = null;
     let lastRank = 0;
@@ -176,7 +205,7 @@ const FinalLeaderboard = () => {
 
   const topScore = ranked[0]?.score ?? null;
   const isTieAtTop = topScore !== null && ranked.filter((r) => r.score === topScore).length > 1;
-  const winner = isTieAtTop ? null : ranked[0]?.player ?? null;
+  const winner = isTieAtTop ? null : (ranked[0]?.player ?? null);
 
   /* Group into podium positions (rank 1, 2, 3). Each group can hold multiple tied players. */
   const podiumGroups = useMemo(() => {
@@ -216,21 +245,21 @@ const FinalLeaderboard = () => {
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: 'spring', stiffness: 200 }}
+        transition={{ type: "spring", stiffness: 200 }}
         className="mt-4 text-center"
       >
         <Trophy className="mx-auto h-12 w-12 text-yellow-500" />
-        <h2 className="mt-2 text-3xl font-black text-foreground">{t('gameOver')}</h2>
+        <h2 className="mt-2 text-3xl font-black text-foreground">{t("gameOver")}</h2>
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: revealed ? 1 : 0 }}
           className="mt-1 text-base font-semibold text-muted-foreground"
         >
           {isTieAtTop
-            ? `🤝 ${t('itsATie')}`
+            ? `🤝 ${t("itsATie")}`
             : winner
-              ? `🎉 ${t('congratulations').replace('{name}', winner.nickname)}`
-              : ''}
+              ? `🎉 ${t("congratulations").replace("{name}", winner.nickname)}`
+              : ""}
         </motion.p>
       </motion.div>
 
@@ -239,84 +268,84 @@ const FinalLeaderboard = () => {
         {podiumDisplayOrder
           .filter((rank) => podiumGroups[rank] && podiumGroups[rank].length > 0)
           .map((rank) => {
-          const group = podiumGroups[rank];
-          const isFirst = rank === 1;
-          const podiumHeight = PODIUM_PIXELS[rank];
+            const group = podiumGroups[rank];
+            const isFirst = rank === 1;
+            const podiumHeight = PODIUM_PIXELS[rank];
 
-          return (
-            <div key={rank} className="flex w-24 flex-col items-center gap-1">
-              {/* Row of tied players above the podium (side-by-side) */}
-              <div className="flex items-end justify-center gap-2">
-                {group.map(({ player }) => {
-                  const avatar = getAvatarById(player.avatar_id ?? avatarMap[player.id] ?? 1);
-                  const isMe = player.id === currentPlayer?.id;
-                  // Don't show crown if 1st place is tied
-                  const showCrown = isFirst && !isTieAtTop;
+            return (
+              <div key={rank} className="flex w-24 flex-col items-center gap-1">
+                {/* Row of tied players above the podium (side-by-side) */}
+                <div className="flex items-end justify-center gap-2">
+                  {group.map(({ player }) => {
+                    const avatar = getAvatarById(player.avatar_id ?? avatarMap[player.id] ?? 1);
+                    const isMe = player.id === currentPlayer?.id;
+                    // Don't show crown if 1st place is tied
+                    const showCrown = isFirst && !isTieAtTop;
 
-                  return (
-                    <AnimatePresence key={player.id} mode="wait">
-                      {revealed ? (
-                        <motion.div
-                          key="avatar"
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-                          className="flex flex-col items-center gap-0.5"
-                        >
-                          {showCrown && (
-                            <motion.span
-                              animate={{ y: [0, -4, 0] }}
-                              transition={{ repeat: Infinity, duration: 1.4, ease: 'easeInOut' }}
-                              className="text-xl leading-none"
+                    return (
+                      <AnimatePresence key={player.id} mode="wait">
+                        {revealed ? (
+                          <motion.div
+                            key="avatar"
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                            className="flex flex-col items-center gap-0.5"
+                          >
+                            {showCrown && (
+                              <motion.span
+                                animate={{ y: [0, -4, 0] }}
+                                transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut" }}
+                                className="text-xl leading-none"
+                              >
+                                👑
+                              </motion.span>
+                            )}
+                            {!showCrown && isFirst && <span className="text-xl leading-none opacity-0">👑</span>}
+                            <motion.img
+                              src={avatar.image}
+                              alt={avatar.nameKey}
+                              className={`object-contain rounded-full ${isFirst ? "h-14 w-14" : "h-10 w-10"}`}
+                              animate={showCrown ? { scale: [1, 1.05, 1] } : {}}
+                              transition={showCrown ? { repeat: Infinity, duration: 2, ease: "easeInOut" } : {}}
+                            />
+                            <p
+                              className={`text-center text-xs font-bold truncate max-w-[70px] ${isMe ? "text-primary" : "text-foreground"}`}
                             >
-                              👑
-                            </motion.span>
-                          )}
-                          {!showCrown && isFirst && <span className="text-xl leading-none opacity-0">👑</span>}
-                          <motion.img
-                            src={avatar.image}
-                            alt={avatar.nameKey}
-                            className={`object-contain rounded-full ${
-                              isFirst ? 'h-14 w-14' : 'h-10 w-10'
-                            }`}
-                            animate={showCrown ? { scale: [1, 1.05, 1] } : {}}
-                            transition={showCrown ? { repeat: Infinity, duration: 2, ease: 'easeInOut' } : {}}
-                          />
-                          <p className={`text-center text-xs font-bold truncate max-w-[70px] ${isMe ? 'text-primary' : 'text-foreground'}`}>
-                            {player.nickname}
-                          </p>
-                        </motion.div>
-                      ) : (
-                        <motion.div key="placeholder" className="flex flex-col items-center gap-0.5">
-                          {isFirst && <span className="text-xl leading-none opacity-0">👑</span>}
-                          <div className={`rounded-full bg-muted ${isFirst ? 'h-14 w-14' : 'h-10 w-10'}`} />
-                          <div className="h-3 w-12 rounded bg-muted" />
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  );
-                })}
+                              {player.nickname}
+                            </p>
+                          </motion.div>
+                        ) : (
+                          <motion.div key="placeholder" className="flex flex-col items-center gap-0.5">
+                            {isFirst && <span className="text-xl leading-none opacity-0">👑</span>}
+                            <div className={`rounded-full bg-muted ${isFirst ? "h-14 w-14" : "h-10 w-10"}`} />
+                            <div className="h-3 w-12 rounded bg-muted" />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    );
+                  })}
+                </div>
+
+                <span className="text-lg">{medals[rank - 1]}</span>
+
+                {/* Score (use first in group — they're tied so all the same) */}
+                <AnimatedScore
+                  score={group[0].player.score ?? 0}
+                  delay={SCORE_START_DELAY + (rank - 1) * 150}
+                  className="text-xs font-black text-primary"
+                />
+
+                {/* Podium bar */}
+                <motion.div
+                  initial={{ height: 0 }}
+                  animate={{ height: podiumHeight }}
+                  transition={{ duration: PODIUM_RISE_DURATION / 1000, delay: 0.15, ease: [0.34, 1.56, 0.64, 1] }}
+                  className="w-full rounded-t-lg bg-primary/20"
+                />
               </div>
-
-              <span className="text-lg">{medals[rank - 1]}</span>
-
-              {/* Score (use first in group — they're tied so all the same) */}
-              <AnimatedScore
-                score={group[0].player.score ?? 0}
-                delay={SCORE_START_DELAY + (rank - 1) * 150}
-                className="text-xs font-black text-primary"
-              />
-
-              {/* Podium bar */}
-              <motion.div
-                initial={{ height: 0 }}
-                animate={{ height: podiumHeight }}
-                transition={{ duration: PODIUM_RISE_DURATION / 1000, delay: 0.15, ease: [0.34, 1.56, 0.64, 1] }}
-                className="w-full rounded-t-lg bg-primary/20"
-              />
-            </div>
-          );
-        })}
+            );
+          })}
       </div>
 
       {/* Full ranking (uses dense rank: tied players show same medal/number) */}
@@ -331,9 +360,9 @@ const FinalLeaderboard = () => {
               key={player.id}
               initial={{ y: -30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: rowDelay, type: 'spring', stiffness: 260, damping: 20 }}
+              transition={{ delay: rowDelay, type: "spring", stiffness: 260, damping: 20 }}
               className={`flex items-center gap-3 rounded-xl px-4 py-3 shadow-sm ${
-                isMe ? 'bg-primary/15 ring-2 ring-primary/50' : 'bg-card'
+                isMe ? "bg-primary/15 ring-2 ring-primary/50" : "bg-card"
               }`}
             >
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-black text-primary-foreground">
@@ -348,7 +377,7 @@ const FinalLeaderboard = () => {
                     alt={avatar.nameKey}
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 15 }}
                     className="h-8 w-8 rounded-full object-contain"
                   />
                 ) : (
@@ -363,15 +392,11 @@ const FinalLeaderboard = () => {
                       key="name"
                       initial={{ opacity: 0, scale: 0.7 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 15 }}
                       className="text-base font-bold text-card-foreground"
                     >
                       {player.nickname}
-                      {isMe && (
-                        <span className="ml-2 text-xs font-semibold text-muted-foreground">
-                          ({t('you')})
-                        </span>
-                      )}
+                      {isMe && <span className="ml-2 text-xs font-semibold text-muted-foreground">({t("you")})</span>}
                     </motion.span>
                   ) : (
                     <div key="ph" className="h-4 w-20 rounded bg-muted" />
@@ -393,7 +418,7 @@ const FinalLeaderboard = () => {
       <div className="mt-auto flex w-full max-w-sm flex-col gap-3 pt-6 pb-4">
         <Button onClick={goHome} variant="outline" size="lg" className="w-full gap-2">
           <Home className="h-5 w-5" />
-          {t('newGame')}
+          {t("newGame")}
         </Button>
       </div>
     </motion.div>
