@@ -259,6 +259,7 @@ export type Database = {
           last_played_at: string | null
           options: Json
           question_text: string
+          sub_category: string | null
           times_played: number | null
           type: string | null
         }
@@ -274,6 +275,7 @@ export type Database = {
           last_played_at?: string | null
           options: Json
           question_text: string
+          sub_category?: string | null
           times_played?: number | null
           type?: string | null
         }
@@ -289,6 +291,58 @@ export type Database = {
           last_played_at?: string | null
           options?: Json
           question_text?: string
+          sub_category?: string | null
+          times_played?: number | null
+          type?: string | null
+        }
+        Relationships: []
+      }
+      temp_questions: {
+        Row: {
+          category: string | null
+          correct_answer: string | null
+          created_at: string | null
+          difficulty: string | null
+          explanation: string | null
+          id: string | null
+          is_active: boolean | null
+          language: string | null
+          last_played_at: string | null
+          options: Json | null
+          question_text: string | null
+          sub_category: string | null
+          times_played: number | null
+          type: string | null
+        }
+        Insert: {
+          category?: string | null
+          correct_answer?: string | null
+          created_at?: string | null
+          difficulty?: string | null
+          explanation?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          language?: string | null
+          last_played_at?: string | null
+          options?: Json | null
+          question_text?: string | null
+          sub_category?: string | null
+          times_played?: number | null
+          type?: string | null
+        }
+        Update: {
+          category?: string | null
+          correct_answer?: string | null
+          created_at?: string | null
+          difficulty?: string | null
+          explanation?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          language?: string | null
+          last_played_at?: string | null
+          options?: Json | null
+          question_text?: string | null
+          sub_category?: string | null
           times_played?: number | null
           type?: string | null
         }

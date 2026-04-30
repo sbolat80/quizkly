@@ -12,11 +12,14 @@ import { useCountUp } from '@/hooks/use-count-up';
 const medals = ['🥇', '🥈', '🥉'];
 
 /* ── Confetti canvas ── */
+const EMIT_DURATION_MS = 5000;
+
 const ConfettiCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particles = useRef<Array<{
     x: number; y: number; w: number; h: number;
     color: string; vx: number; vy: number; rot: number; vr: number; opacity: number;
+    restY: number; settled: boolean; stackOffset: number;
   }>>([]);
 
   useEffect(() => {
@@ -25,7 +28,21 @@ const ConfettiCanvas = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+    const resize = () => {
+      const oldH = canvas.height;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      // Re-anchor settled pieces to the new bottom
+      const dh = canvas.height - oldH;
+      if (dh !== 0) {
+        particles.current.forEach((p) => {
+          if (p.settled) {
+            p.restY = canvas.height - p.stackOffset;
+            p.y = p.restY;
+          }
+        });
+      }
+    };
     resize();
     window.addEventListener('resize', resize);
 
@@ -35,6 +52,7 @@ const ConfettiCanvas = () => {
     ];
 
     for (let i = 0; i < 120; i++) {
+      const stackOffset = 4 + Math.random() * 40;
       particles.current.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height - canvas.height,
@@ -42,21 +60,37 @@ const ConfettiCanvas = () => {
         h: 4 + Math.random() * 4,
         color: colors[Math.floor(Math.random() * colors.length)],
         vx: (Math.random() - 0.5) * 3,
-        vy: 1.5 + Math.random() * 3,
+        vy: 2 + Math.random() * 3.5,
         rot: Math.random() * 360,
         vr: (Math.random() - 0.5) * 8,
         opacity: 0.8 + Math.random() * 0.2,
+        restY: canvas.height - stackOffset,
+        settled: false,
+        stackOffset,
       });
     }
 
+    const startTime = performance.now();
     let raf: number;
     const draw = () => {
+      const elapsed = performance.now() - startTime;
+      const stopped = elapsed > EMIT_DURATION_MS;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      let allSettled = true;
       particles.current.forEach((p) => {
-        p.x += p.vx;
-        p.y += p.vy;
-        p.rot += p.vr;
-        if (p.y > canvas.height + 20) { p.y = -10; p.x = Math.random() * canvas.width; }
+        if (!p.settled) {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.vr;
+          if (p.y >= p.restY) {
+            p.y = p.restY;
+            p.vx = 0; p.vy = 0; p.vr = 0;
+            p.settled = true;
+          } else {
+            allSettled = false;
+          }
+        }
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate((p.rot * Math.PI) / 180);
@@ -65,6 +99,11 @@ const ConfettiCanvas = () => {
         ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
         ctx.restore();
       });
+
+      if (stopped && allSettled) {
+        // Final frame already drawn — keep it visible, stop the loop.
+        return;
+      }
       raf = requestAnimationFrame(draw);
     };
     raf = requestAnimationFrame(draw);

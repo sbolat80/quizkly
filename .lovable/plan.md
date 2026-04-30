@@ -1,49 +1,33 @@
+## Confetti: stop after 5s, settle at bottom
 
+### Current behavior
+In `src/components/game/FinalLeaderboard.tsx`, `ConfettiCanvas` spawns 120 particles that fall and **wrap around** to the top forever, so confetti never stops and never accumulates.
 
-## Compact Game Code Layout + Question Language Description
+### Desired behavior
+1. New confetti stops being emitted/animated as falling rain after **5 seconds**.
+2. Pieces that have already fallen come to rest at the bottom of the screen and **stay visible** (piling up like real confetti).
 
-### What changes
+### Implementation
 
-**1. Waiting Room — compact code/QR area**
+Edit `src/components/game/FinalLeaderboard.tsx` — `ConfettiCanvas` component only.
 
-Restructure the code section to match the uploaded mockup:
+Changes to the animation loop:
 
-```text
-┌─────────────────────────────┬──────────┐
-│  [ TRXUF7  📋 ]             │  ▓▓▓▓▓   │
-│   Tap to copy               │  ▓ QR ▓  │
-│                             │  ▓▓▓▓▓   │
-│  [ 🔗 Share join link ]     │ Scan to  │
-│                             │  join    │
-└─────────────────────────────┴──────────┘
-```
+- Track a `startTime` when the effect mounts. After `elapsed > 5000ms`, set a `stopped` flag — no new particles, and any particle still above the floor continues falling but is no longer recycled to the top.
+- Remove the wrap-around recycle (`if (p.y > canvas.height + 20) { p.y = -10; ... }`). Replace with a "settle" rule:
+  - Each particle has a target resting `y = canvas.height - floorOffset - stackJitter`, where `floorOffset` is small (e.g. 4–10px) and `stackJitter` adds 0–40px so pieces pile naturally instead of forming a flat line.
+  - When `p.y >= restY`, clamp `p.y = restY`, set `p.vy = 0`, `p.vx = 0`, `p.vr = 0` (mark as `settled`), and stop rotating.
+- Keep the RAF loop running so settled pieces continue to be drawn (they remain visible at the bottom). Once `stopped` is true AND every particle is `settled`, cancel the RAF (static pieces stay on the canvas — last frame persists).
+- Slightly reduce vertical velocity range so the 5s window gives most pieces time to reach the floor; remaining airborne pieces will still fall to rest after the timer because we keep the loop running until all settle.
+- Keep canvas `fixed inset-0 z-50 pointer-events-none` so the settled pile sits over the UI without blocking clicks. (If it visually interferes with the "New Game"/"Home" buttons, we can lower z-index to behind the action buttons — flag for review after first look.)
 
-- Remove the standalone "GAME CODE" label above the row.
-- Two-column layout: left column stacks the purple code button + "Tap to copy" hint, then the outlined "Share join link" button directly below. Right column keeps QR + "Scan to join".
-- Tighten vertical spacing (`gap-3` instead of `gap-5`) so the whole block is denser.
-- Keep existing colors, fonts, and button styles — purely structural.
-
-**2. Question language descriptive text**
-
-Currently the language shows only as `🇬🇧 English` next to the players header. Make it more descriptive with a dedicated row above the players list:
-
-```text
-🇬🇧  Questions will be in English
-```
-
-- Use a small pill/badge styled row with the flag + a sentence like "Questions will be in English" / "Sorular İngilizce olacak".
-- Add new i18n keys:
-  - `questionsWillBeIn`: `"Questions will be in {lang}"` / `"Sorular {lang} dilinde olacak"`
-  - Reuse existing `langEnglish` / `langTurkish` for the language name interpolation.
-- Remove the small inline language indicator from the players header row (now redundant).
+### Technical notes
+- No new dependencies.
+- Particle count stays at 120 (intensity unchanged during the 5s burst; user only complained about duration). If the user later wants it less intense, we can drop to ~70.
+- Resize handler: on resize after settling, recompute each settled particle's `restY` so the pile stays glued to the new bottom edge.
 
 ### Files touched
-
-- `src/components/game/WaitingRoom.tsx` — restructure the code/QR/share block; add language description row above players list.
-- `src/i18n/en.ts` and `src/i18n/tr.ts` — add `questionsWillBeIn` key.
+- `src/components/game/FinalLeaderboard.tsx`
 
 ### Out of scope
-
-- No changes to game logic, realtime, or QR generation behavior.
-- No font, color, or theme changes.
-
+- No changes to game flow, sounds, leaderboard layout, or other screens.
