@@ -71,10 +71,12 @@ const ConfettiCanvas = () => {
     }
 
     const startTime = performance.now();
+    const FADE_DURATION_MS = 1200;
     let raf: number;
     const draw = () => {
       const elapsed = performance.now() - startTime;
       const stopped = elapsed > EMIT_DURATION_MS;
+      const fadeT = stopped ? Math.min(1, (elapsed - EMIT_DURATION_MS) / FADE_DURATION_MS) : 0;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       let allSettled = true;
@@ -91,17 +93,19 @@ const ConfettiCanvas = () => {
             allSettled = false;
           }
         }
+        const alpha = p.settled ? p.opacity * (1 - fadeT) : p.opacity;
+        if (alpha <= 0) return;
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate((p.rot * Math.PI) / 180);
-        ctx.globalAlpha = p.opacity;
+        ctx.globalAlpha = alpha;
         ctx.fillStyle = p.color;
         ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
         ctx.restore();
       });
 
-      if (stopped && allSettled) {
-        // Final frame already drawn — keep it visible, stop the loop.
+      if (stopped && allSettled && fadeT >= 1) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         return;
       }
       raf = requestAnimationFrame(draw);
