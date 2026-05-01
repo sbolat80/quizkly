@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 
-export function useCountUp(target: number, duration = 1200, delay = 0): number {
-  const [value, setValue] = useState(0);
+export function useCountUp(target: number, duration = 1200, delay = 0, from = 0): number {
+  const [value, setValue] = useState(from);
   const startRef = useRef<number | null>(null);
   const rafRef = useRef<number>(0);
 
   useEffect(() => {
+    setValue(from);
+    startRef.current = null;
     const timeout = setTimeout(() => {
-      const from = 0;
       const animate = (timestamp: number) => {
         if (startRef.current === null) startRef.current = timestamp;
         const elapsed = timestamp - startRef.current;
@@ -26,7 +27,7 @@ export function useCountUp(target: number, duration = 1200, delay = 0): number {
       clearTimeout(timeout);
       cancelAnimationFrame(rafRef.current);
     };
-  }, [target, duration, delay]);
+  }, [target, duration, delay, from]);
 
   return value;
 }

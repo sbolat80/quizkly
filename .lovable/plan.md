@@ -1,33 +1,70 @@
-## Confetti: stop after 5s, settle at bottom
+## Incremental Score & Reorder Animation (Interim Leaderboard)
 
-### Current behavior
-In `src/components/game/FinalLeaderboard.tsx`, `ConfettiCanvas` spawns 120 particles that fall and **wrap around** to the top forever, so confetti never stops and never accumulates.
+Change the round-end leaderboard so each player's score reads:
+**previous total → previous total +earned → new total** (animated count-up from previous, not from 0), then the `+earned` chip disappears and rows smoothly reorder if rankings changed.
 
-### Desired behavior
-1. New confetti stops being emitted/animated as falling rain after **5 seconds**.
-2. Pieces that have already fallen come to rest at the bottom of the screen and **stay visible** (piling up like real confetti).
+This applies to the per-round `InterimLeaderboard` only. The end-of-game `FinalLeaderboard` (one-time reveal) stays as-is.
 
-### Implementation
+### Visual / timing flow per row
 
-Edit `src/components/game/FinalLeaderboard.tsx` — `ConfettiCanvas` component only.
+```text
+t = 0.0s   Render: 1,250                    (rows in OLD order = previous-score order)
+t = 0.3s   Render: 1,250  +750              (chip fades/scales in, accent color)
+t = 0.6s   Animate count-up 1,250 → 2,000   (~1.0s, ease-out, NEVER from 0)
+t = 1.6s   Chip fades out, leaving: 2,000
+t = 1.9s   Rows reorder to new ranking      (Framer Motion layout transition)
+```
 
-Changes to the animation loop:
+Stagger between rows stays (~80ms) so higher-ranked players animate slightly earlier.
 
-- Track a `startTime` when the effect mounts. After `elapsed > 5000ms`, set a `stopped` flag — no new particles, and any particle still above the floor continues falling but is no longer recycled to the top.
-- Remove the wrap-around recycle (`if (p.y > canvas.height + 20) { p.y = -10; ... }`). Replace with a "settle" rule:
-  - Each particle has a target resting `y = canvas.height - floorOffset - stackJitter`, where `floorOffset` is small (e.g. 4–10px) and `stackJitter` adds 0–40px so pieces pile naturally instead of forming a flat line.
-  - When `p.y >= restY`, clamp `p.y = restY`, set `p.vy = 0`, `p.vx = 0`, `p.vr = 0` (mark as `settled`), and stop rotating.
-- Keep the RAF loop running so settled pieces continue to be drawn (they remain visible at the bottom). Once `stopped` is true AND every particle is `settled`, cancel the RAF (static pieces stay on the canvas — last frame persists).
-- Slightly reduce vertical velocity range so the 5s window gives most pieces time to reach the floor; remaining airborne pieces will still fall to rest after the timer because we keep the loop running until all settle.
-- Keep canvas `fixed inset-0 z-50 pointer-events-none` so the settled pile sits over the UI without blocking clicks. (If it visually interferes with the "New Game"/"Home" buttons, we can lower z-index to behind the action buttons — flag for review after first look.)
+### How "previous score" is captured
 
-### Technical notes
-- No new dependencies.
-- Particle count stays at 120 (intensity unchanged during the 5s burst; user only complained about duration). If the user later wants it less intense, we can drop to ~70.
-- Resize handler: on resize after settling, recompute each settled particle's `restY` so the pile stays glued to the new bottom edge.
+Players come from Supabase already containing the new total when we enter the `leaderboard` phase. We need the totals from BEFORE this round to compute `earned = newTotal - previousTotal`.
+
+In `src/context/GameContext.tsx`, in the `leaderboard` phase branch (currently lines 239–243):
+1. Read the current `players` from the store (these still hold the previous-round totals because `getGamePlayers` hasn't been called yet for this transition).
+2. Build `previousScores: Record<playerId, number>` from them.
+3. Then fetch fresh players (new totals) and set them.
+4. Store `previousScores` on the game store so `InterimLeaderboard` can read it.
+
+If a player has no previous entry (edge case: joined mid-game), treat previous as `0` so earned = newTotal.
+
+### Component changes (`InterimLeaderboard.tsx`)
+
+- Sort rows in TWO stages:
+  - Initial render: sort by **previous score** so the starting order matches what players just saw.
+  - After the count-up completes (single timer ~1.6s after mount), switch to sorting by **new score**.
+- Wrap each row in `motion.div` with a stable `layout` prop and a `key={player.id}`. Framer Motion's `layout` animation handles the smooth reorder when the sorted array changes.
+- Replace `AnimatedScore` so it counts from `previousScore` to `newScore` (not from 0):
+  - Uses a new `useCountUp` overload (or inline RAF) that accepts a `from` value.
+  - Renders the count-up number plus, for the duration `[300ms .. 1600ms]`, a `+earned` chip next to it. Chip uses `text-accent` (or `text-primary` with a subtle background) and `animate-scale-in` on enter / fade out on exit via `AnimatePresence`.
+  - Hide the chip entirely when `earned === 0`.
+- Medal/rank badges (🥇🥈🥉, 4, 5…) update together with reorder so the leftmost number always reflects the current rank.
+
+### Hook change (`src/hooks/use-count-up.ts`)
+
+Add an optional `from` parameter (default `0`) and initialize `value` to `from` so the displayed number never flashes 0. Existing callers (FinalLeaderboard) are unaffected because the default stays `0`.
+
+```text
+useCountUp(target, duration?, delay?, from?)
+```
+
+### Store change (`src/stores/gameStore.ts`)
+
+Add:
+- `previousScores: Record<string, number>` (defaults to `{}`)
+- `setPreviousScores(map)`
+- Reset to `{}` in `reset()` and whenever a new question becomes active so we don't leak stale data.
 
 ### Files touched
-- `src/components/game/FinalLeaderboard.tsx`
+
+- `src/context/GameContext.tsx` — snapshot previous scores on entering `leaderboard` phase; clear them on `question_active`.
+- `src/stores/gameStore.ts` — add `previousScores` state + setter.
+- `src/hooks/use-count-up.ts` — support a `from` starting value.
+- `src/components/game/InterimLeaderboard.tsx` — two-stage sort, layout-animated rows, count-up from previous, transient `+earned` chip.
 
 ### Out of scope
-- No changes to game flow, sounds, leaderboard layout, or other screens.
+
+- No backend / RPC changes.
+- No changes to `FinalLeaderboard` or `RoundResult`.
+- No changes to scoring formulas, sounds, or i18n strings.
