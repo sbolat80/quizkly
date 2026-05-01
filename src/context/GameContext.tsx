@@ -205,6 +205,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         const phase = updatedGame.phase;
 
         if (phase === 'question_active') {
+          // Snapshot pre-round scores so the upcoming leaderboard can animate
+          // from the previous total instead of restarting from 0.
+          const snapshot: Record<string, number> = {};
+          (s.players ?? []).forEach((p: any) => { snapshot[p.id] = p.score ?? 0; });
+          s.setPreviousScores(snapshot);
+
           const newIdx = updatedGame.current_question_index ?? 0;
           s.setCurrentQuestionIndex(newIdx);
           resetPlayerAnswerState();
